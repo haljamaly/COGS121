@@ -3,8 +3,8 @@ Milestone 1 due @ Thursday, April 12 at 11:59pm
 Team name:  Kitty Girls
 
 Team members:
-    Shuyuan Ma
-    Hasan Jamaly
+    Shuyuan Ma,
+    Hasan Jamaly,
     Dominic Spencer
 
 one-paragraph project proposal describing your team's project idea:
