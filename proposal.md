@@ -1,11 +1,15 @@
 Milestone 1 due @ Thursday, April 12 at 11:59pm
 
-Team name:  TBD
+Team name:  Kitty Girls
 
 Team members:
     Shuyuan Ma
     Hasan Jamaly
     Dominic Spencer
 
-one-paragraph project proposal describing your team's project idea.
-Feel free to write down several ideas if you want more feedback from your TA. Only 1 idea is required, but we suggest several if you are unsure of whether they fall within scope of this course's requirements.
+one-paragraph project proposal describing your team's project idea:
+
+We hope to create an interactive travel blog platform. People can connect with others and explore who has visisted places aroudn the world. A similar example is https://travelmap.net . We are inspired by the personal informatics of Location and travel. User profiles show traveling history. This offers novel data visualization tactscs: Pins on maps, layout designs. Backend functionalities support a search and sort users based on locations.Traveling blogs, like some basic blog platforms.
+
+
+
