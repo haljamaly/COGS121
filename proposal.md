@@ -4,7 +4,7 @@ Team name:  Kitty Girls
 
 Team members:
     Shuyuan Ma,
-    Hasan Jamaly,
+    Hasan Al - Jamaly,
     Dominic Spencer
 
 one-paragraph project proposal describing your team's project idea:
