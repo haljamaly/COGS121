@@ -1,8 +1,8 @@
 # COGS121 2018 Spring
 COGS121 project repo
-    Team name: TBD
+    Team name: Kitty Girls
 
     Team members:
         Shuyuan Ma
-        Hasan Jamaly
+        Hasan Al - Jamaly,
         Dominic Spencer
