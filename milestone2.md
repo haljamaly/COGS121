@@ -39,4 +39,7 @@ ______________________________
 
 __Prototype 2__ 
 
-![Screenshot](prot2_1.jpg)
+![Screenshot](prot2_1.png)
+![Screenshot](prot2_2.png)
+![Screenshot](prot2_3.png)
+![Screenshot](prot2_4.png)
