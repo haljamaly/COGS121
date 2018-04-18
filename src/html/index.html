@@ -1,0 +1,77 @@
+<html>
+<head>
+<title>Here-n-There</title>
+
+<script src="../js/jquery-3.3.1.min.js"></script>
+
+<script type="text/javascript">
+
+// below is copied from PetsApp-v1 for COGS121 by Philip Guo
+// https://github.com/pgbovine/COGS121
+$(document).ready(() => {
+  $('#readButton').click(() => {
+    const requestURL = '../users/' + $('#nameBox').val().toLowerCase();
+    console.log('making ajax request to:', requestURL);
+
+    // From: http://learn.jquery.com/ajax/jquery-ajax-methods/
+    // Using the core $.ajax() method since it's the most flexible.
+    // ($.get() and $.getJSON() are nicer convenience functions)
+    $.ajax({
+      url: requestURL,
+      type: 'GET',
+      dataType : 'json', // this URL returns data in JSON format
+      success: (data) => {
+        console.log('You received some data!', data);
+
+        if (data.profile_img && data.been_to) {
+          $('#status').html('Successfully fetched data at URL: ' + requestURL);
+          $('#uname').html('Hi, I am ' + data.uname);
+          $('#been_to').html('I have been to ' + data.been_to);
+          $('#profile_img').attr('src', "../"+data.profile_img).attr('width', '300px');
+        } else {
+          $('#status').html('Error: could not find user at URL: ' + requestURL);
+          // clear the display
+          $('#been_to').html('');
+          $('#profile_img').attr('src', '').attr('width', '0px');
+        }
+      },
+    });
+  });
+
+  $('#allUsersButton').click(() => {
+    $.ajax({
+      url: '../users/',
+      type: 'GET',
+      dataType : 'json',
+      success: (data) => {
+        console.log('You received some data!', data);
+        $('#status').html('All users: ' + data);
+      },
+    });
+  });
+
+  // define a generic Ajax error handler:
+  // http://api.jquery.com/ajaxerror/
+  $(document).ajaxError(() => {
+    $('#status').html('Error: unknown ajaxError!');
+  });
+});
+</script>
+
+</head>
+<body>
+  <h1>Welcome to Here-n-There!</h1>
+
+  Name: <input id="nameBox" type="text" size="20"/>
+  <button id="readButton">Get profile</button>
+  <button id="allUsersButton">Get all usernames</button>
+  <hr/>
+  <img id="profile_img"></img>
+  <div id="uname"></div>
+  <div id="been_to"></div>
+
+  <hr/>
+
+  <div id="status"></div>
+</body>
+</html>
