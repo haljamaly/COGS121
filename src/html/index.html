@@ -1,9 +1,5 @@
-<html>
-<head>
-<title>Here-n-There</title>
-
-<script src="../js/jquery-3.3.1.min.js"></script>
-
+{% extends 'layout.html' %}
+{% block body %}
 <script type="text/javascript">
 
 // below is copied from PetsApp-v1 for COGS121 by Philip Guo
@@ -58,20 +54,18 @@ $(document).ready(() => {
 });
 </script>
 
-</head>
-<body>
-  <h1>Welcome to Here-n-There!</h1>
+<h1>Welcome to Here-n-There!</h1>
 
-  Name: <input id="nameBox" type="text" size="20"/>
-  <button id="readButton">Get profile</button>
-  <button id="allUsersButton">Get all usernames</button>
-  <hr/>
-  <img id="profile_img"></img>
-  <div id="uname"></div>
-  <div id="been_to"></div>
+Name: <input id="nameBox" type="text" size="20"/>
+<button id="readButton">Get profile</button>
+<button id="allUsersButton">Get all usernames</button>
+<hr/>
+<img id="profile_img"></img>
+<div id="uname"></div>
+<div id="been_to"></div>
 
-  <hr/>
+<hr/>
 
-  <div id="status"></div>
-</body>
-</html>
+<div id="status"></div>
+
+{% endblock %}

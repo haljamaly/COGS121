@@ -14,7 +14,8 @@
   "author": "Shuyuan Ma, Hasan Jamaly, Dominic Spencer",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.16.3"
+    "express": "^4.16.3",
+    "nunjucks": "^3.1.2"
   },
   "bugs": {
     "url": "https://github.com/haljamaly/COGS121/issues"
