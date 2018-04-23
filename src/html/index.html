@@ -11,8 +11,8 @@
 // below is copied from PetsApp-v1 for COGS121 by Philip Guo
 // https://github.com/pgbovine/COGS121
 $(document).ready(() => {
-  $('#readButton').click(() => {
-    const requestURL = '../locations/' + $('#nameBox').val().toLowerCase().split(' ').join('_');
+  $('#filterButton').click(() => {
+    const requestURL = '../locations/' + $('#locationBox').val().toLowerCase().split(' ').join('_');
     console.log(requestURL);
     console.log('making ajax request to:', requestURL);
 
@@ -29,15 +29,15 @@ $(document).ready(() => {
         if (data) {
           $('.alllinks').remove();
           for (i = 0; i < data.length; ++i) {
-            $("#pics").append('<a href="/post/' + data[i].id + '"> <img src="' + data[i].primary_img + '"> </a>' );
+            $("#pics").append('<a class="alllinks" href="/post/' + data[i].id + '"><img src="' + data[i].primary_img + '"></a>' );
           }
         } else {
-          $("#pics").append('<span> Invalid search man! </span>' );
+          $("#pics").append('<span class="alllinks"> Invalid search man! </span>' );
         }
       },
     });
   });
-
+/*
   $('#allUsersButton').click(() => {
     $.ajax({
       url: '../users/',
@@ -49,11 +49,12 @@ $(document).ready(() => {
       },
     });
   });
-
+*/
   // define a generic Ajax error handler:
   // http://api.jquery.com/ajaxerror/
   $(document).ajaxError(() => {
-    $("#pics").append('<span> Invalid search man! </span>' );
+    $('#status').html('Error: unknown ajaxError!');
+    console.log('Error: unknown ajaxError!');
   });
 
   $('.dropdown-toggle').dropdown();
@@ -62,25 +63,28 @@ $(document).ready(() => {
 
 <h1>Welcome to Here-n-There!</h1>
 
-
-<hr/>
-
 <hr/>
 <iframe
 src="https://www.google.com/maps/embed?pb=!1m10!1m8!1m3!1d49921682.98558856!2d-1.219544210558942!3d40.20955851951437!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2sus!4v1524440040796 &key=AIzaSyAgZAsmAyovxVeCtAyXFUJ42hQxphw9YEY"
-width="1100" height="500" frameborder="0" style="border:0" allowfullscreen></iframe>
+width="80%" height="400" frameborder="0" style="border:0" allowfullscreen></iframe>
 <hr/>
 <div class="row">
-  <div class="col-xs-6 gallery"> <h1> Gallery </h1>
-  <input id="nameBox" type="text" size="20"/>
-  <button id="readButton">Filter Location</button>
-  {% for id, post in posts %}
-    <a class="alllinks" href="/post/{{id}}"> <img class="allpics" src="{{post.primary_img}}"></img> </a>
-  {% endfor %}
-  <div id="pics"></div>
-</div>
-  <div class="col-xs-3"> <h2> Stats </h2> </div>
-  <div class="col-xs-3"><h2> Top Locations </h2> </div>
+  <div class="col-xs-6 gallery">
+    <h1>Gallery</h1>
+    <input id="locationBox" type="text" size="20"/>
+    <button id="filterButton">Filter Location</button>
+    <div id="pics">
+      {% for id, post in posts %}
+        <a class="alllinks" href="/post/{{id}}"><img class="allpics" src="{{post.primary_img}}"/></a>
+      {% endfor %}
+    </div>
+  </div>
+  <div class="col-xs-3">
+    <h2>Stats</h2>
+  </div>
+  <div class="col-xs-3">
+    <h2>Top Locations</h2>
+  </div>
 </div>
 <div id="status"></div>
 
