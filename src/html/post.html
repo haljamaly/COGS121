@@ -1,7 +1,7 @@
 {% extends 'layout.html' %}
 {% block body %}
 <div id="primary_img">
-  <img src="{{ primary_img }}"/>
+  <img src="{{ primary_img }}" width="100%"/>
 </div>
 <div id="post_title">
   <h1><strong>{{ post_title }}</strong></h1>
@@ -13,11 +13,12 @@
   <h4>Location: {{ location }}</h4>
 </div>
 <div id="time">
-  <h4>Time: {{time}}</h4>
+  <h4>Time: {{ time }}</h4>
 </div>
 <hr/>
 <div id="content">
-  {{ content }}
+  {{ content | safe }}
 </div>
+
 
 {% endblock %}

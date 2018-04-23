@@ -39,7 +39,7 @@ const fakeDatabase = {
   posts: {
     1: {
       title: 'Mount Fuji is good!',
-      primary_img: 'img/1.jpg',
+      primary_img: '../img/1.jpg',
       time: '2018-4-22T10:25:43.511Z',
       author: 1,
       location: 'Fuji Mountain',
@@ -47,7 +47,7 @@ const fakeDatabase = {
     },
     2: {
       title: 'LA is lit!',
-      primary_img: 'img/1.jpg',
+      primary_img: '../img/1.jpg',
       time: '2018-4-22T14:25:43.511Z',
       author: 2,
       location: 'Los Angeles',
