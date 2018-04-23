@@ -32,12 +32,7 @@ $(document).ready(() => {
             $("#pics").append('<a href="/post/' + data[i].id + '"> <img src="' + data[i].primary_img + '"> </a>' );
           }
         } else {
-          $('#status').html('Error: could not find user at URL: ' + requestURL);
-          $('#uname').html('');
-
-          // clear the display
-          $('#visited').html('');
-          $('#profile_img').attr('src', '').attr('width', '0px');
+          $("#pics").append('<span> Invalid search man! </span>' );
         }
       },
     });
@@ -58,7 +53,7 @@ $(document).ready(() => {
   // define a generic Ajax error handler:
   // http://api.jquery.com/ajaxerror/
   $(document).ajaxError(() => {
-    $('#status').html('Error: unknown ajaxError!');
+    $("#pics").append('<span> Invalid search man! </span>' );
   });
 });
 </script>

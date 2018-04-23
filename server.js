@@ -121,7 +121,6 @@ app.get('/about', function(req, res) {
 
 app.get('/locations/:location', (req, res) => {
   const nameToLookup = req.params.location.toLowerCase().split('_').join(' '); // matches ':userid' above
-  console.log(nameToLookup);
   let val = '';
   Object.keys(fakeDatabase.locations).some((key) => {
     if (key.toLowerCase() == nameToLookup) {
@@ -139,7 +138,8 @@ app.get('/locations/:location', (req, res) => {
     console.log(data);
     res.send(data);
   } else {
-    res.send({}); // failed, so return an empty object instead of undefined
+    return;
+    //res.send({}); // failed, so return an empty object instead of undefined
   }
 });
 
