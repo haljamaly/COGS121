@@ -12,7 +12,8 @@
 // https://github.com/pgbovine/COGS121
 $(document).ready(() => {
   $('#readButton').click(() => {
-    const requestURL = '../users/' + $('#nameBox').val().toLowerCase();
+    const requestURL = '../locations/' + $('#nameBox').val().toLowerCase().split(' ').join('_');
+    console.log(requestURL);
     console.log('making ajax request to:', requestURL);
 
     // From: http://learn.jquery.com/ajax/jquery-ajax-methods/
@@ -24,12 +25,12 @@ $(document).ready(() => {
       dataType : 'json', // this URL returns data in JSON format
       success: (data) => {
         console.log('You received some data!', data);
-
-        if (data.profile_img) {
-          $('#status').html('Successfully fetched data at URL: ' + requestURL);
-          $('#uname').html('Hi, I am ' + data.name);
-          $('#visited').html('I have been to ' + data.visited);
-          $('#profile_img').attr('src', "../"+data.profile_img).attr('width', '300px');
+        console.log(data.length);
+        if (data) {
+          $('.alllinks').remove();
+          for (i = 0; i < data.length; ++i) {
+            $("#pics").append('<a href="/post/' + data[i].id + '"> <img src="' + data[i].primary_img + '"> </a>' );
+          }
         } else {
           $('#status').html('Error: could not find user at URL: ' + requestURL);
           $('#uname').html('');
@@ -75,15 +76,13 @@ src="https://www.google.com/maps/embed?pb=!1m10!1m8!1m3!1d49921682.98558856!2d-1
 width="1100" height="500" frameborder="0" style="border:0" allowfullscreen></iframe>
 <hr/>
 <div class="row">
-  <div class="col-xs-6"> <h1> Gallery </h1>
+  <div class="col-xs-6 gallery"> <h1> Gallery </h1>
   <input id="nameBox" type="text" size="20"/>
   <button id="readButton">Filter Location</button>
   {% for id, post in posts %}
-    <a href="/post/{{id}}"> <img src="{{post.primary_img}}"></img> </a>
+    <a class="alllinks" href="/post/{{id}}"> <img class="allpics" src="{{post.primary_img}}"></img> </a>
   {% endfor %}
-  <img id="profile_img"></img>
-  <div id="uname"></div>
-  <div id="visited"></div>
+  <div id="pics"></div>
 </div>
   <div class="col-xs-3"> <h2> Stats </h2> </div>
   <div class="col-xs-3"><h2> Top Locations </h2> </div>

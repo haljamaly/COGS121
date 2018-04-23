@@ -43,7 +43,8 @@ const fakeDatabase = {
       time: '2018-4-22T10:25:43.511Z',
       author: 1,
       location: 'Fuji Mountain',
-      content: '<p>Yo, Mount Fuji is awesome.</p>'
+      content: '<p>Yo, Mount Fuji is awesome.</p>',
+      id: 1
     },
     2: {
       title: 'LA is lit!',
@@ -51,7 +52,8 @@ const fakeDatabase = {
       time: '2018-4-22T14:25:43.511Z',
       author: 2,
       location: 'Los Angeles',
-      content: '<p>Los Angeles is beautiful and alive.</p>'
+      content: '<p>Los Angeles is beautiful and alive.</p>',
+      id: 2
     }
   },
 
@@ -113,6 +115,31 @@ app.get('/login', function(req, res) {
 
 app.get('/about', function(req, res) {
     res.render('about.html', { title: 'about' });
+});
+
+
+app.get('/locations/:location', (req, res) => {
+  const nameToLookup = req.params.location.toLowerCase().split('_').join(' '); // matches ':userid' above
+  console.log(nameToLookup);
+  let val = '';
+  Object.keys(fakeDatabase.locations).some((key) => {
+    if (key.toLowerCase() == nameToLookup) {
+      val = fakeDatabase.locations[key].posts;
+      return true;
+    }
+  });
+  console.log(nameToLookup, '->', val); // for debugging
+  let data = [];
+  if (val) {
+    val.forEach((post) => {
+      console.log(post);
+      data.push(fakeDatabase.posts[post]);
+    });
+    console.log(data);
+    res.send(data);
+  } else {
+    res.send({}); // failed, so return an empty object instead of undefined
+  }
 });
 
 
