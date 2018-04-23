@@ -19,15 +19,17 @@ $(document).ready(() => {
       success: (data) => {
         console.log('You received some data!', data);
 
-        if (data.profile_img && data.been_to) {
+        if (data.profile_img) {
           $('#status').html('Successfully fetched data at URL: ' + requestURL);
-          $('#uname').html('Hi, I am ' + data.uname);
-          $('#been_to').html('I have been to ' + data.been_to);
+          $('#uname').html('Hi, I am ' + data.name);
+          $('#visited').html('I have been to ' + data.visited);
           $('#profile_img').attr('src', "../"+data.profile_img).attr('width', '300px');
         } else {
           $('#status').html('Error: could not find user at URL: ' + requestURL);
+          $('#uname').html('');
+
           // clear the display
-          $('#been_to').html('');
+          $('#visited').html('');
           $('#profile_img').attr('src', '').attr('width', '0px');
         }
       },
@@ -62,7 +64,7 @@ Name: <input id="nameBox" type="text" size="20"/>
 <hr/>
 <img id="profile_img"></img>
 <div id="uname"></div>
-<div id="been_to"></div>
+<div id="visited"></div>
 
 <hr/>
 

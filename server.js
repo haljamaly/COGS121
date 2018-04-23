@@ -12,18 +12,73 @@ const nunjucks = require('nunjucks');
 app.use(express.static('src'));
 
 const fakeDatabase = {
-  'shuyuan': {uid: 1,
-              uname: 'Shuyuan',
-              profile_img: 'img/shuyuan.jpg',
-              been_to: ['Fuji Mountain']},
-  'hasan':   {uid: 2,
-              uname: 'Hasan',
-              profile_img: 'img/hasan.jpg',
-              been_to: ['Fuji Mountain', 'Los Angelos']},
-  'dominic': {uid: 3,
-              uname: 'Dominic',
-              profile_img: 'img/dom.jpg',
-              been_to: ['Los Angelos']}
+  users: {
+    1: {
+      uid: 1,
+      name: 'Shuyuan',
+      profile_img: 'img/shuyuan.jpg',
+      posts: [1],
+      visited: ['Mount Fuji'],
+      wishilist: ['Los Angeles']},
+    2: {
+      uid: 2,
+      name: 'Hasan',
+      profile_img: 'img/hasan.jpg',
+      posts: [2],
+      visited: ['Los Angeles'],
+      wishilist: ['New York']},
+    3: {
+      uid: 3,
+      name: 'Dominic',
+      profile_img: 'img/dom.jpg',
+      posts: [],
+      visited: ['Los Angeles'],
+      wishilist: ['Mount Fuji']}
+  },
+
+  posts: {
+    1: {
+      title: 'Mount Fuji is good!',
+      primary_img: 'img/1.jpg',
+      time: '2018-4-22T10:25:43.511Z',
+      author: 1,
+      location: 'Fuji Mountain',
+      content: '<p>Yo, Mount Fuji is awesome.</p>'
+    },
+    2: {
+      title: 'LA is lit!',
+      primary_img: 'img/1.jpg',
+      time: '2018-4-22T14:25:43.511Z',
+      author: 2,
+      location: 'Los Angeles',
+      content: '<p>Los Angeles is beautiful and alive.</p>'
+    }
+  },
+
+  locations: {
+    'Mount Fuji': {
+      posts: [1],
+      visited_users: [1],
+      wish_users: [3],
+      coordinate: '35°21\'29\"N 138°43\'52\"E',
+      score: 3
+    },
+    'Los Angeles': {
+      posts: [2],
+      visited_users: [2, 3],
+      wish_users: [1],
+      coordinate: '34°03\'N 118°15\'W',
+      score: 4
+    },
+    'New York': {
+      posts: [],
+      visited_users: [],
+      wish_users: [2],
+      coordinate: '34°03\'N 118°15\'W',
+      score: 1
+    }
+  }
+
 };
 
 // setup nunjuck template
@@ -64,14 +119,23 @@ app.get('/about', function(req, res) {
  * handle data access
  */
 app.get('/users', (req, res) => {
-  const allUsernames = Object.keys(fakeDatabase); // returns a list of object keys
+  //const allUsernames = Object.keys(fakeDatabase); // returns a list of object keys
+  const allUsernames = Object.keys(fakeDatabase.users).map((key) => {
+    return fakeDatabase.users[key].name;
+  });
   console.log('allUsernames is:', allUsernames);
   res.send(allUsernames);
 });
 
-app.get('/users/:userid', (req, res) => {
-  const nameToLookup = req.params.userid; // matches ':userid' above
-  const val = fakeDatabase[nameToLookup];
+app.get('/users/:username', (req, res) => {
+  const nameToLookup = req.params.username.toLowerCase(); // matches ':userid' above
+  let val = '';
+  Object.keys(fakeDatabase.users).some((key) => {
+    if (fakeDatabase.users[key].name.toLowerCase() == nameToLookup) {
+      val = fakeDatabase.users[key];
+      return true;
+    }
+  });
   console.log(nameToLookup, '->', val); // for debugging
   if (val) {
     res.send(val);
