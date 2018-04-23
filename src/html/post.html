@@ -16,9 +16,22 @@
   <h4>Time: {{ time }}</h4>
 </div>
 <hr/>
-<div id="content">
+<div id="content" style="min-height: 200px">
   {{ content | safe }}
 </div>
+<hr/>
+<h1><strong>Comment</strong></h1>
+<form id="comment">
+  <textarea rows="4" style="width: 80%">
+  </textarea>
+  <br/>
+  <button class="btn btn-primary" type="submit">Submit Comment</button>
+  <button class="btn btn-info" type="reset">Clear</button>
+</form>
 
+<hr/>
+<footer>
+  <h4>Some footer</h4>
+</footer>
 
 {% endblock %}
