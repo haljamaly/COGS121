@@ -91,9 +91,8 @@ nunjucks.configure('src/html', {
  * handle routes
  */
 app.get('/', function(req, res) {
-  let posts = fakeDatabase.posts;
-  console.log(posts);
-    res.render('index.html', {posts})
+  const posts = fakeDatabase.posts;
+  res.render('index.html', {title: 'home', posts: posts})
 });
 
 app.get('/posts', function(req, res) {
