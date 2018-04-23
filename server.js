@@ -39,7 +39,7 @@ const fakeDatabase = {
   posts: {
     1: {
       title: 'Mount Fuji is good!',
-      primary_img: 'img/1.jpg',
+      primary_img: 'https://news.cruise1st.co.uk/wp-content/uploads/2018/03/header-mount-fuji.jpg',
       time: '2018-4-22T10:25:43.511Z',
       author: 1,
       location: 'Fuji Mountain',
@@ -47,7 +47,7 @@ const fakeDatabase = {
     },
     2: {
       title: 'LA is lit!',
-      primary_img: 'img/1.jpg',
+      primary_img: 'https://amp.businessinsider.com/images/5aa2d4bb06b2b72a008b45c3-750-563.jpg',
       time: '2018-4-22T14:25:43.511Z',
       author: 2,
       location: 'Los Angeles',
@@ -91,7 +91,9 @@ nunjucks.configure('src/html', {
  * handle routes
  */
 app.get('/', function(req, res) {
-    res.render('index.html', { title: 'home' });
+  let posts = fakeDatabase.posts;
+  console.log(posts);
+    res.render('index.html', {posts})
 });
 
 app.get('/posts', function(req, res) {

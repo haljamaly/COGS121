@@ -64,13 +64,8 @@ $(document).ready(() => {
 
 <h1>Welcome to Here-n-There!</h1>
 
-Name: <input id="nameBox" type="text" size="20"/>
-<button id="readButton">Get profile</button>
-<button id="allUsersButton">Get all usernames</button>
+
 <hr/>
-<img id="profile_img"></img>
-<div id="uname"></div>
-<div id="visited"></div>
 
 <hr/>
 <iframe
@@ -78,9 +73,18 @@ src="https://www.google.com/maps/embed?pb=!1m10!1m8!1m3!1d49921682.98558856!2d-1
 width="1100" height="500" frameborder="0" style="border:0" allowfullscreen></iframe>
 <hr/>
 <div class="row">
-  <div class="col-xs-6"> <h1> Photo Gallery </h1></div>
+  <div class="col-xs-6"> <h1> Gallery </h1>
+  <input id="nameBox" type="text" size="20"/>
+  <button id="readButton">Filter Location</button>
+  {% for id, post in posts %}
+    <a href="/post/{{id}}"> <img src="{{post.primary_img}}"></img> </a>
+  {% endfor %}
+  <img id="profile_img"></img>
+  <div id="uname"></div>
+  <div id="visited"></div>
+</div>
   <div class="col-xs-3"> <h2> Stats </h2> </div>
-  <div class="col-xs-3"><h2> Top Countries </h2> </div>
+  <div class="col-xs-3"><h2> Top Locations </h2> </div>
 </div>
 <div id="status"></div>
 
