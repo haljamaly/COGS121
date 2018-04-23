@@ -1,7 +1,13 @@
 {% extends 'layout.html' %}
 {% block body %}
-<script type="text/javascript">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
 
+<!-- jQuery library -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+<!-- Latest compiled JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script type="text/javascript">
 // below is copied from PetsApp-v1 for COGS121 by Philip Guo
 // https://github.com/pgbovine/COGS121
 $(document).ready(() => {
@@ -65,7 +71,15 @@ Name: <input id="nameBox" type="text" size="20"/>
 <div id="been_to"></div>
 
 <hr/>
-
+<iframe
+src="https://www.google.com/maps/embed?pb=!1m10!1m8!1m3!1d49921682.98558856!2d-1.219544210558942!3d40.20955851951437!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2sus!4v1524440040796 &key=AIzaSyAgZAsmAyovxVeCtAyXFUJ42hQxphw9YEY"
+width="1100" height="500" frameborder="0" style="border:0" allowfullscreen></iframe>
+<hr/>
+<div class="row">
+  <div class="col-xs-6"> <h1> Photo Gallery </h1></div>
+  <div class="col-xs-3"> <h2> Stats </h2> </div>
+  <div class="col-xs-3"><h2> Top Countries </h2> </div>
+</div>
 <div id="status"></div>
 
 {% endblock %}
