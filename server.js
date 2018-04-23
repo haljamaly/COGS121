@@ -144,6 +144,25 @@ app.get('/users/:username', (req, res) => {
   }
 });
 
+app.get('/post/:postid', (req, res) => {
+  const postid = req.params.postid;
+  const val = fakeDatabase.posts[postid];
+  console.log(postid, '->', val); // for debugging
+  if (val) {
+    res.render('post.html', { title: val.title+' - '+fakeDatabase.users[val.author].name,
+                              post_title: val.title,
+                              primary_img: val.primary_img,
+                              time: val.time,
+                              location: val.location,
+                              author: fakeDatabase.users[val.author].name,
+                              content: val.content});
+  } else {
+    res.render('error.html'); // failed, so return an empty object instead of undefined
+  }
+
+
+});
+
 // start the server at URL: http://localhost:3000/
 app.listen(3000, () => {
   console.log('Server started at http://localhost:3000/');

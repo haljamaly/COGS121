@@ -1,0 +1,23 @@
+{% extends 'layout.html' %}
+{% block body %}
+<div id="primary_img">
+  <img src="{{ primary_img }}"/>
+</div>
+<div id="post_title">
+  <h1><strong>{{ post_title }}</strong></h1>
+</div>
+<div id="author">
+  <h4>Author: {{ author }}</h4>
+</div>
+<div id="location">
+  <h4>Location: {{ location }}</h4>
+</div>
+<div id="time">
+  <h4>Time: {{time}}</h4>
+</div>
+<hr/>
+<div id="content">
+  {{ content }}
+</div>
+
+{% endblock %}
