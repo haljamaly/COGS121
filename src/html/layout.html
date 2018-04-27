@@ -14,53 +14,49 @@
     <div class="container">
       <h1 class="logo">Here-n-There</h1>
       <nav class="navbar navbar-inverse">
-    <div class="container-fluid">
-      <ul class="nav navbar-nav">
-        <li {% if title == "home" %} class='active' {% endif %}>
-          <a href="/">Home</a>
-        </li>
-        <li {% if title == "posts" %} class='active' {% endif %}>
-          <a href="/posts">Posts</a>
-        </li>
-        <li {% if title == "locations" %} class='active' {% endif %}>
-          <a href="/locations">Locations</a>
-        </li>
+        <div class="container-fluid">
+          <ul class="nav navbar-nav">
+            <li {% if title == "home" %} class='active' {% endif %}>
+              <a href="/">Home</a>
+            </li>
+            <li {% if title == "posts" %} class='active' {% endif %}>
+              <a href="/posts">Posts</a>
+            </li>
+            <li {% if title == "locations" %} class='active' {% endif %}>
+              <a href="/locations">Locations</a>
+            </li>
 
-        <li class="dropdown">
-          <a class="dropdown-toggle" data-toggle="dropdown" href="#">Profile
-            <span class="caret"></span></a>
-          <ul class="dropdown-menu">
-            <li><a href="/profile">View my profile</a></li>
-            <!-- TODO: conditional on login/logout -->
-            <li><a href="/login">Login</a></li>
-            <li><a href="/logout">Logout</a></li>
+            <li class="dropdown">
+              <a class="dropdown-toggle" data-toggle="dropdown" href="#">Profile
+                <span class="caret"></span></a>
+              <ul class="dropdown-menu">
+                <li><a href="/profile">View my profile</a></li>
+                <!-- TODO: conditional on login/logout -->
+                <li><a href="/login">Login</a></li>
+                <li><a href="/logout">Logout</a></li>
+              </ul>
+            </li>
+            <li {% if title == "about" %} class='active' {% endif %}>
+              <a href="/about">About</a>
+            </li>
           </ul>
-        </li>
-        <li {% if title == "about" %} class='active' {% endif %}>
-          <a href="/about">About</a>
-        </li>
-      </ul>
-    </div>
-  </nav>
-
+        </div>
+      </nav>
     </div>
   </header>
   <div class="container">
-    <!-- TODO: Flash massages -->
-    {#
-    {% with messages = get_flashed_messages(with_categories=True) %}
-    {% if messages %}
-    <ul >
-      {% for message in messages %}
-      <div class="alert alert-{{ message[0] }}">
+    <!-- Flash massages -->
+    {% if flash %}
+    {% for type, message in flash %}
+    <ul>
+      <div class="alert alert-{{ type }}">
         <button type="button" class="close" data-dismiss="alert">&times;</button>
-        {{ message[1] }}
+        {{ message }}
       </div>
-      {% endfor %}
     </ul>
+    {% endfor %}
     {% endif %}
-    {% endwith %}
-    #}
+    <!-- Below goes every page of the wesites -->
     {% block body %}
     {% endblock %}
   </div>

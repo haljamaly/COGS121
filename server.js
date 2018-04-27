@@ -4,12 +4,34 @@
  * Author: Shuyuan Ma, Hasan Jamaly, Dominic Spencer
  */
 const express = require('express');
-const app = express();
-const path = require('path');
+const flash = require('express-flash-2');
 const nunjucks = require('nunjucks');
+
+const path = require('path');
+const cookieParser = require('cookie-parser');
+const session = require('express-session');
+const app = express();
 
 // all static files (html, js, css, img) goes into /src/
 app.use(express.static('src'));
+
+// random secret key
+app.use(cookieParser('Y76(&@GB@#H@(&))'));
+
+app.use(session({
+  secret: 'keyboard cat',
+  resave: true,
+  saveUninitialized:true
+}));
+
+// use the flash middleware
+app.use(flash());
+
+// setup nunjuck template
+nunjucks.configure('src/html', {
+    autoescape: true,
+    express: app
+});
 
 const fakeDatabase = {
   users: {
@@ -83,11 +105,6 @@ const fakeDatabase = {
 
 };
 
-// setup nunjuck template
-nunjucks.configure('src/html', {
-    autoescape: true,
-    express: app
-});
 
 /*
  * handle routes
@@ -98,25 +115,34 @@ app.get('/', function(req, res) {
 });
 
 app.get('/posts', function(req, res) {
-    res.render('posts.html', { title: 'posts' });
+
+  res.render('posts.html', { title: 'posts' });
 });
 
 app.get('/locations', function(req, res) {
-    res.render('locations.html', { title: 'locations' });
+  res.render('locations.html', { title: 'locations' });
 });
 
 app.get('/profile', function(req, res) {
-    res.render('profile.html', { title: 'profile' });
+  res.render('profile.html', { title: 'profile' });
 });
 
 app.get('/login', function(req, res) {
-    res.render('login.html', { title: 'login' });
+  res.render('login.html', { title: 'login' });
 });
 
 app.get('/about', function(req, res) {
-    res.render('about.html', { title: 'about' });
+  res.render('about.html', { title: 'about' });
 });
 
+// for testing flash message
+app.get('/flash', function(req, res){
+  // Set a flash message by passing the key, followed by the value, to res.flash().
+  // for types, please refer https://getbootstrap.com/docs/4.0/components/alerts/
+  res.flash('danger', 'Flash danger is back!');
+  res.flash('info', 'Flash info is back!');
+  res.redirect('/');
+});
 
 app.get('/locations/:location', (req, res) => {
   const nameToLookup = req.params.location.toLowerCase().split('_').join(' '); // matches ':userid' above
@@ -187,8 +213,6 @@ app.get('/post/:postid', (req, res) => {
   } else {
     res.render('error.html'); // failed, so return an empty object instead of undefined
   }
-
-
 });
 
 // start the server at URL: http://localhost:3000/

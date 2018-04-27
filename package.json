@@ -14,7 +14,10 @@
   "author": "Shuyuan Ma, Hasan Jamaly, Dominic Spencer",
   "license": "ISC",
   "dependencies": {
+    "cookie-parser": "^1.4.3",
     "express": "^4.16.3",
+    "express-flash-2": "^1.0.1",
+    "express-session": "^1.15.6",
     "nunjucks": "^3.1.2"
   },
   "bugs": {
