@@ -114,9 +114,9 @@ app.get('/', function(req, res) {
   res.render('index.html', {title: 'home', posts: posts})
 });
 
-app.get('/posts', function(req, res) {
+app.get('/newpost', function(req, res) {
 
-  res.render('posts.html', { title: 'posts' });
+  res.render('newpost.html', { title: 'new post ' });
 });
 
 app.get('/locations', function(req, res) {
