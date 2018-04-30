@@ -6,11 +6,15 @@
 const express = require('express');
 const flash = require('express-flash-2');
 const nunjucks = require('nunjucks');
+const sqlite3 = require('sqlite3');
+const db = new sqlite3.Database('app.db');
 
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const session = require('express-session');
 const app = express();
+const bodyParser = require('body-parser');
+app.use(bodyParser.urlencoded({extended: true})); // hook up with your app
 
 // all static files (html, js, css, img) goes into /src/
 app.use(express.static('src'));
