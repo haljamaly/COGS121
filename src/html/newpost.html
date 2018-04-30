@@ -2,5 +2,42 @@
 {% block body %}
 <h1>New PostPage</h1>
 
+<script src="jquery-3.3.1.min.js"></script>
+
+<script type="text/javascript">
+
+$(document).ready(() => {
+  $('#insertButton').click(() => {
+    $.ajax({
+      // all URLs are relative to http://localhost:3000/
+      url: 'users',
+      type: 'POST', // <-- this is POST, not GET
+      data: {
+              name: $('#insertNameBox').val(),
+              job: $('#insertJobBox').val(),
+              pet: $('#insertPetBox').val()
+            },
+            success: (data) => {
+              $('#status').html(data.message);
+            }
+          });
+        });
+        // define a generic Ajax error handler:
+        // http://api.jquery.com/ajaxerror/
+        $(document).ajaxError(() => {
+          $('#status').html('Error: unknown ajaxError!');
+        });
+      });
+</script>
+
+  <hr/>
+  Name: <input id="insertNameBox" type="text" size="20"/>
+  Job: <input id="insertJobBox" type="text" size="300"/>
+  Pet: <input id="insertPetBox" type="text" size="20"/>
+
+  <button id="insertButton">Make New Post!</button>
+
+  <hr/>
+  <div id="status"></div>
 
 {% endblock %}
