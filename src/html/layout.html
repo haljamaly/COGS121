@@ -11,65 +11,116 @@
 
   <!-- Google One-tap sign-up and auto sign-in on websites
        https://developers.google.com/identity/one-tap/web/get-started -->
-  <script src="https://smartlock.google.com/client">
-    // onLoad callback, try to retrieve credential
-    window.onGoogleYoloLoad = (googleyolo) => {
-      console.log('The googleyolo object is ready for use.');
+  <script src="https://smartlock.google.com/client"></script>
 
-
-    };
-    function login() {
-      // retrieve call
-      const retrievePromise = googleyolo.retrieve({
-        supportedAuthMethods: [
-          "https://accounts.google.com",
-          "googleyolo://id-and-password"
-        ],
-        supportedIdTokenProviders: [
-          {
-            uri: "https://accounts.google.com",
-            clientId: "687083663797-h6rk9pcjjm2ac1kib7kcbbjqpqc2ipcg.apps.googleusercontent.com"
-          }
-        ]
+  <script type="text/javascript">
+    function useGoogleIdTokenForAuth(idToken) {
+      $.ajax({
+        url : 'idTokenLogin',
+        type: 'POST',
+        data: {
+          idToken: idToken
+        },
+        success: (data) => {
+          console.log('idTokenLogin: success');
+        }
       });
-
-      // After credential is retrieved
-      retrievePromise.then((credential) => {
-        /*
-        if (credential.password) {
-          // An ID (usually email address) and password credential was retrieved.
-          // Sign in to your backend using the password.
-          signInWithEmailAndPassword(credential.id, credential.password);
-        } else {
-          // A Google Account is retrieved. Since Google supports ID token responses,
-          // you can use the token to sign in instead of initiating the Google sign-in
-          // flow.
-          useGoogleIdTokenForAuth(credential.idToken);
-        }
-        */
-        // TODO: useGoogleIdTokenForAuth()
-        useGoogleIdTokenForAuth(credential.idToken);
-      }, (error) => {
-        // Credentials could not be retrieved. In general, if the user does not
-        // need to be signed in to use the page, you can just fail silently; or,
-        // you can also examine the error object to handle specific error cases.
-        console.log('GoogleYolo credential retrieve failed.');
-        // If retrieval failed because there were no credentials available, and
-        // signing in might be useful or is required to proceed from this page,
-        // you can call `hint()` to prompt the user to select an account to sign
-        // in or sign up with.
-        if (error.type === 'noCredentialsAvailable') {
-          googleyolo.hint('GoogleYolo credential retrieve failed.').then(login());
-        }
+      // define a generic Ajax error handler:
+      // http://api.jquery.com/ajaxerror/
+      $(document).ajaxError(() => {
+        console.log('Error: unknown ajaxError during useGoogleIdTokenForAuth()!');
       });
     }
 
     function logout() {
-      disableAutoSignIn().then(() => {
-        // Auto sign-in disabled.
-        console.log('Logout: Auto sign-in disabled.');
+      $.ajax({
+        url : 'logout',
+        type: 'POST',
+        success: () => {
+          console.log('idTokenLogout: success');
+        }
+      });
+      // define a generic Ajax error handler:
+      // http://api.jquery.com/ajaxerror/
+      $(document).ajaxError(() => {
+        console.log('Error: unknown ajaxError during logout()');
       });
     }
+
+    const PUBLIC_CLIENT_ID = '687083663797-h6rk9pcjjm2ac1kib7kcbbjqpqc2ipcg.apps.googleusercontent.com'
+    // CONFIG documentation: https://developers.google.com/identity/one-tap/web/retrieve-credentials
+    const CONFIG = {
+      supportedAuthMethods: [
+        'https://accounts.google.com'
+      ],
+      supportedIdTokenProviders: [
+        {
+          uri: 'https://accounts.google.com',
+          clientId: PUBLIC_CLIENT_ID
+        }
+      ]
+    };
+    // onLoad callback, try to retrieve credential
+    window.onGoogleYoloLoad = (googleyolo) => {
+
+      console.log("GoogleYolo loaded.");
+      const retrievePromise = googleyolo.retrieve(CONFIG);
+      // The googleyolo.retrieve() method returns a Promise that resolves when
+      // the request has completed. Attach a resolution function to the Promise
+      // to handle the credential if one was retrieved.
+      retrievePromise.then((credential) => {
+        if (credential.password) {
+          // An ID (usually email address) and password credential was retrieved.
+          // Sign in to your backend using the password.
+          // signInWithEmailAndPassword(credential.id, credential.password);
+          console.log('credential.id:', credential.id, 'credential.password:', credential.password);
+        } else {
+          // A Google Account is retrieved. Since Google supports ID token
+          // responses, you can use the token to sign in instead of initiating
+          // the Google sign-in flow.
+
+          // console.log('credential.idToken:', credential.idToken);
+          useGoogleIdTokenForAuth(credential.idToken);
+        }
+      }, (error) => {
+        // Credentials could not be retrieved. In general, if the user does not
+        // need to be signed in to use the page, you can just fail silently; or,
+        // you can also examine the error object to handle specific error cases.
+        console.log('Silent Fail:', error);
+        // If retrieval failed because there were no credentials available, and
+        // signing in might be useful or is required to proceed from this page,
+        // you can call `hint()` to prompt the user to select an account to sign
+        // in or sign up with.
+        /*
+        if (error.type === 'noCredentialsAvailable') {
+          googleyolo.hint(...).then(...);
+        }
+        */
+      });
+    };
+
+    $(document).ready(() => {
+      $('#loginNav').click(() => {
+        googleyolo.hint(CONFIG).then((credential) => {
+          if (credential.password) {
+            console.log('credential.id:', credential.id, 'credential.password:', credential.password);
+          } else {
+            // console.log('credential.idToken:', credential.idToken);
+            useGoogleIdTokenForAuth(credential.idToken);
+          }
+        }, (error) => {
+          console.log("Silent Fail:", error);
+        });
+      });
+      $('#logoutNav').click(() => {
+        googleyolo.disableAutoSignIn().then(() => {
+          // Auto sign-in disabled.
+          console.log('Logout: Auto sign-in disabled.');
+        });
+        logout();
+      });
+    });
+
   </script>
 </head>
 <body>
@@ -95,8 +146,8 @@
               <ul class="dropdown-menu">
                 <li><a href="/profile">View my profile</a></li>
                 <!-- TODO: conditional on login/logout -->
-                <li><a>Login</a></li>
-                <li><a>Logout</a></li>
+                <li><a id="loginNav">Login</a></li>
+                <li><a id="logoutNav">Logout</a></li>
               </ul>
             </li>
             <li {% if title == "about" %} class='active' {% endif %}>
