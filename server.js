@@ -137,9 +137,8 @@ app.get('/', function(req, res) {
 // });
 // });
 
-app.get('/posts', function(req, res) {
-
-  res.render('posts.html', { title: 'posts' });
+app.get('/newpost', function(req, res) {
+  res.render('newpost.html', { title: 'posts' });
 });
 
 app.get('/locations', function(req, res) {
