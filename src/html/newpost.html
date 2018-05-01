@@ -29,6 +29,8 @@
 $(document).ready(() => {
   $('#insertButton').click(() => {
     let time = new Date(Date.now()).toJSON();
+    let text = $('#insertBodyBox').find('.nicEdit-main').html();
+    console.log(text);
     console.log(time);
     $.ajax({
       // all URLs are relative to http://localhost:3000/
@@ -36,7 +38,7 @@ $(document).ready(() => {
       type: 'POST', // <-- this is POST, not GET
       data: {
               name: $('#insertNameBox').val(),
-              body: $('#insertBodyBox').val(),
+              body: text,
               location: $('#insertLocationtBox').val(),
               image: $('#insertImageURL').val(),
               time: time,
@@ -59,12 +61,12 @@ $(document).ready(() => {
   <hr/>
   Name: <input id="insertNameBox" type="text" size="20"/>
   <br>
-  Location: <input id="insertlocationtBox" type="text" size="20"/>
+  Location: <input id="insertLocationtBox" type="text" size="20"/>
   <br>
-  Image: <input id="insertimageURL" type="text" size="20"/>
+  Image: <input id="insertImageURL" type="text" size="20"/>
   <br>
-  Body: <form id="insertbodyBox">
-          <textarea rows="4" style="width: 80%"></textarea>
+  Body: <form id="insertBodyBox">
+          <textarea id="theText" rows="4" style="width: 80%"></textarea>
         </form>
   <br>
 
