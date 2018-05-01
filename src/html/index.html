@@ -74,8 +74,8 @@ width="80%" height="400" frameborder="0" style="border:0" allowfullscreen></ifra
     <input id="locationBox" type="text" size="20"/>
     <button id="filterButton">Filter Location</button>
     <div id="pics">
-      {% for id, post in posts %}
-        <a class="alllinks" href="/post/{{id}}"><img class="allpics" src="{{post.primary_img}}"/></a>
+      {% for post in posts %}
+        <a class="alllinks" href="/post/{{post.pid}}"><img class="allpics" src="{{post.img}}"/></a>
       {% endfor %}
     </div>
   </div>

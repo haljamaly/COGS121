@@ -114,13 +114,32 @@ const fakeDatabase = {
  * handle routes
  */
 app.get('/', function(req, res) {
-  const posts = fakeDatabase.posts;
-  res.render('index.html', {title: 'home', posts: posts})
+  let posts = [];
+  db.serialize(function() {
+      db.each("SELECT * FROM posts", function(err, row) {
+          posts.push(row);
+      }, function() {
+          // All done fetching records, render response
+          console.log(posts);
+          res.render("index.html", {posts: posts, title: 'home'});
+      });
+  });
 });
 
-app.get('/newpost', function(req, res) {
+//   db.serialize( () => {
+//   db.each('SELECT * FROM posts', posts,  (err, rows) => {
+//     posts.push(rows);
+//   });
+//   () => {
+//   console.log(posts);
+//   res.render('index.html', {title: 'home', posts: posts})
+// };
+// });
+// });
 
-  res.render('newpost.html', { title: 'new post ' });
+app.get('/posts', function(req, res) {
+
+  res.render('posts.html', { title: 'posts' });
 });
 
 app.get('/locations', function(req, res) {

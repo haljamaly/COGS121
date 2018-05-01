@@ -22,13 +22,23 @@ db.serialize(() => {
   db.run("CREATE TABLE users (uid text PRIMARY KEY, name text NOT NULL, img text)");
   db.run("CREATE TABLE wishlist (user text NOT NULL, location text NOT NULL)");
   db.run("CREATE TABLE posts (pid text PRIMARY KEY, title text NOT NULL, img text, time text, author text NOT NULL, location text NOT NULL, content text NOT NULL)");
-  db.run("CREATE TABLE locations (coordinate text PRIMARY KEY, title text NOT NULL, score integer NOT NULL)");
+  db.run("CREATE TABLE locations (title text PRIMARY KEY, score integer NOT NULL)");
 
   // insert 3 rows of data:
-  //db.run("INSERT INTO users_to_pets VALUES ('Philip', 'professor', 'cat.jpg')");
+  db.run("INSERT INTO users VALUES ('1', 'Hasan', 'src/img/hasan.jpg')");
+  db.run("INSERT INTO users VALUES ('2', 'Shuyuan', 'src/img/shuyuan.jpg')");
+  db.run("INSERT INTO users VALUES ('3', 'Dom', 'src/img/dom.jpg')");
 
+  db.run("INSERT INTO wishlist VALUES ('1', 'Los Angeles')");
+  db.run("INSERT INTO wishlist VALUES ('3', 'New York')");
 
-  console.log('successfully created the users_to_pets table in pets.db');
+  db.run("INSERT INTO posts VALUES ('1','Mount Fuji is good!', 'https://news.cruise1st.co.uk/wp-content/uploads/2018/03/header-mount-fuji.jpg', '2018-4-22T10:25:43.511', '1', 'Mount Fuji', '<p>Yo, Mount Fuji is awesome.</p>')");
+  db.run("INSERT INTO posts VALUES ('2','Los Angeles is lit!', 'https://amp.businessinsider.com/images/5aa2d4bb06b2b72a008b45c3-750-563.jpg','2018-4-22T14:25:43.511Z','3', 'New York', '<p>Los Angeles is beautiful and alive.</p>')");
+
+  db.run("INSERT INTO locations VALUES ('Mount Fuji', 1 )");
+  db.run ("INSERT INTO locations VALUES ( 'Los Angeles', 1)");
+  db.run("INSERT INTO locations VALUES ('New York', 0)");
+  console.log('successfully created the tables');
 
   // print them out to confirm their contents:
   //db.each("SELECT name, job, pet FROM users_to_pets", (err, row) => {
