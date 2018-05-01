@@ -10,12 +10,14 @@ $(document).ready(() => {
   $('#insertButton').click(() => {
     $.ajax({
       // all URLs are relative to http://localhost:3000/
-      url: 'users',
+      url: 'newpost',
       type: 'POST', // <-- this is POST, not GET
       data: {
               name: $('#insertNameBox').val(),
-              job: $('#insertJobBox').val(),
-              pet: $('#insertPetBox').val()
+              body: $('#insertbodyBox').val(),
+              location: $('#insertlocationtBox').val()
+              image: $('#insertimageURL').val()
+
             },
             success: (data) => {
               $('#status').html(data.message);
@@ -32,8 +34,9 @@ $(document).ready(() => {
 
   <hr/>
   Name: <input id="insertNameBox" type="text" size="20"/>
-  Job: <input id="insertJobBox" type="text" size="300"/>
-  Pet: <input id="insertPetBox" type="text" size="20"/>
+  Body: <input id="insertJobBox" type="text" size="300"/>
+  Location: <input id="insertlocationtBox" type="text" size="20"/>
+  Image: <input id="insertimageURL" type="text" size="20"/>
 
   <button id="insertButton">Make New Post!</button>
 
