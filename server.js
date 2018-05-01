@@ -37,79 +37,6 @@ nunjucks.configure('src/html', {
     express: app
 });
 
-const fakeDatabase = {
-  users: {
-    1: {
-      uid: 1,
-      name: 'Shuyuan',
-      profile_img: 'img/shuyuan.jpg',
-      posts: [1],
-      visited: ['Mount Fuji'],
-      wishilist: ['Los Angeles']},
-    2: {
-      uid: 2,
-      name: 'Hasan',
-      profile_img: 'img/hasan.jpg',
-      posts: [2],
-      visited: ['Los Angeles'],
-      wishilist: ['New York']},
-    3: {
-      uid: 3,
-      name: 'Dominic',
-      profile_img: 'img/dom.jpg',
-      posts: [],
-      visited: ['Los Angeles'],
-      wishilist: ['Mount Fuji']}
-  },
-
-  posts: {
-    1: {
-      title: 'Mount Fuji is good!',
-      primary_img: 'https://news.cruise1st.co.uk/wp-content/uploads/2018/03/header-mount-fuji.jpg',
-      time: '2018-4-22T10:25:43.511Z',
-      author: 1,
-      location: 'Fuji Mountain',
-      content: '<p>Yo, Mount Fuji is awesome.</p>',
-      id: 1
-    },
-    2: {
-      title: 'LA is lit!',
-      primary_img: 'https://amp.businessinsider.com/images/5aa2d4bb06b2b72a008b45c3-750-563.jpg',
-      time: '2018-4-22T14:25:43.511Z',
-      author: 2,
-      location: 'Los Angeles',
-      content: '<p>Los Angeles is beautiful and alive.</p>',
-      id: 2
-    }
-  },
-
-  locations: {
-    'Mount Fuji': {
-      posts: [1],
-      visited_users: [1],
-      wish_users: [3],
-      coordinate: '35°21\'29\"N 138°43\'52\"E',
-      score: 3
-    },
-    'Los Angeles': {
-      posts: [2],
-      visited_users: [2, 3],
-      wish_users: [1],
-      coordinate: '34°03\'N 118°15\'W',
-      score: 4
-    },
-    'New York': {
-      posts: [],
-      visited_users: [],
-      wish_users: [2],
-      coordinate: '34°03\'N 118°15\'W',
-      score: 1
-    }
-  }
-
-};
-
-
 /*
  * handle routes
  */
@@ -125,17 +52,6 @@ app.get('/', function(req, res) {
       });
   });
 });
-
-//   db.serialize( () => {
-//   db.each('SELECT * FROM posts', posts,  (err, rows) => {
-//     posts.push(rows);
-//   });
-//   () => {
-//   console.log(posts);
-//   res.render('index.html', {title: 'home', posts: posts})
-// };
-// });
-// });
 
 app.get('/newpost', function(req, res) {
   res.render('newpost.html', { title: 'posts' });
@@ -167,74 +83,71 @@ app.get('/flash', function(req, res){
 });
 
 app.get('/locations/:location', (req, res) => {
+  let posts = [];
   const nameToLookup = req.params.location.toLowerCase().split('_').join(' '); // matches ':userid' above
   let val = '';
-  Object.keys(fakeDatabase.locations).some((key) => {
-    if (key.toLowerCase() == nameToLookup) {
-      val = fakeDatabase.locations[key].posts;
-      return true;
-    }
-  });
-  console.log(nameToLookup, '->', val); // for debugging
-  let data = [];
-  if (val) {
-    val.forEach((post) => {
-      console.log(post);
-      data.push(fakeDatabase.posts[post]);
+  db.serialize(function() {
+    const nameToLookup = req.params.location.toLowerCase().split('_').join(' '); // matches ':userid' above
+      db.each("SELECT * FROM posts where location = '" + nameToLookup + "' COLLATE NOCASE", function(err, row) {
+          posts.push(row);
+      }, function() {
+          // All done fetching records, render response;
+          res.send(posts);
+        //  res.render("index.html", {posts: posts, title: 'home'});
+      });
     });
-    console.log(data);
-    res.send(data);
-  } else {
-    return;
-    //res.send({}); // failed, so return an empty object instead of undefined
-  }
-});
+  });
 
 
 /*
  * handle data access
  */
 app.get('/users', (req, res) => {
-  //const allUsernames = Object.keys(fakeDatabase); // returns a list of object keys
-  const allUsernames = Object.keys(fakeDatabase.users).map((key) => {
-    return fakeDatabase.users[key].name;
-  });
-  console.log('allUsernames is:', allUsernames);
-  res.send(allUsernames);
+  let names = [];
+  db.serialize(function() {
+      db.each("SELECT name FROM users", function(err, row) {
+          names.push(row);
+      }, function() {
+          // All done fetching records, render response;
+          res.send(names);
+        //  res.render("index.html", {posts: posts, title: 'home'});
+      });
+    });
 });
 
 app.get('/users/:username', (req, res) => {
-  const nameToLookup = req.params.username.toLowerCase(); // matches ':userid' above
+  let posts = [];
+  const nameToLookup = req.params.username.toLowerCase().split('_').join(' '); // matches ':userid' above
   let val = '';
-  Object.keys(fakeDatabase.users).some((key) => {
-    if (fakeDatabase.users[key].name.toLowerCase() == nameToLookup) {
-      val = fakeDatabase.users[key];
-      return true;
-    }
-  });
-  console.log(nameToLookup, '->', val); // for debugging
-  if (val) {
-    res.send(val);
-  } else {
-    res.send({}); // failed, so return an empty object instead of undefined
-  }
+  db.serialize(function() {
+    const nameToLookup = req.params.username.toLowerCase().split('_').join(' '); // matches ':userid' above
+      db.each("SELECT * FROM users where name = '" + nameToLookup + "' COLLATE NOCASE", function(err, row) {
+          posts.push(row);
+      }, function() {
+          // All done fetching records, render response;
+          res.send(posts);
+        //  res.render("index.html", {posts: posts, title: 'home'});
+      });
+    });
 });
 
 app.get('/post/:postid', (req, res) => {
-  const postid = req.params.postid;
-  const val = fakeDatabase.posts[postid];
-  console.log(postid, '->', val); // for debugging
-  if (val) {
-    res.render('post.html', { title: val.title+' - '+fakeDatabase.users[val.author].name,
-                              post_title: val.title,
-                              primary_img: val.primary_img,
-                              time: val.time,
-                              location: val.location,
-                              author: fakeDatabase.users[val.author].name,
-                              content: val.content});
-  } else {
-    res.render('error.html'); // failed, so return an empty object instead of undefined
-  }
+  let post = [];
+  let val = '';
+  db.serialize(function() {
+    const postid = req.params.postid; // matches ':userid' above
+      db.each("SELECT * FROM posts where pid = '" + postid + "'", function(err, row) {
+          post.push(row);
+      }, function() {
+        db.each("SELECT name FROM users where uid = '" + post[0].author + "'", function(err, row) {
+          post[0].author = row.name;
+        }, function() {
+          // All done fetching records, render response;
+          res.render("post.html", post[0]);
+        //  res.render("index.html", {posts: posts, title: 'home'});
+      });
+    });
+  });
 });
 
 // start the server at URL: http://localhost:3000/

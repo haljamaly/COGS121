@@ -29,7 +29,7 @@ $(document).ready(() => {
         if (data) {
           $('.alllinks').remove();
           for (i = 0; i < data.length; ++i) {
-            $("#pics").append('<a class="alllinks" href="/post/' + data[i].id + '"><img src="' + data[i].primary_img + '"></a>' );
+            $("#pics").append('<a class="alllinks" href="/post/' + data[i].pid + '"><img src="' + data[i].img + '"></a>' );
           }
         } else {
           $("#pics").append('<span class="alllinks"> Invalid search man! </span>' );
