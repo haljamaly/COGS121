@@ -13,8 +13,10 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const session = require('express-session');
 const app = express();
+
+// allow post method handeling
 const bodyParser = require('body-parser');
-app.use(bodyParser.urlencoded({extended: true})); // hook up with your app
+app.use(bodyParser.urlencoded({extended: true}));
 
 // all static files (html, js, css, img) goes into /src/
 app.use(express.static('src'));
@@ -33,8 +35,8 @@ app.use(flash());
 
 // setup nunjuck template
 nunjucks.configure('src/html', {
-    autoescape: true,
-    express: app
+  autoescape: true,
+  express: app
 });
 
 /*
@@ -43,13 +45,13 @@ nunjucks.configure('src/html', {
 app.get('/', function(req, res) {
   let posts = [];
   db.serialize(function() {
-      db.each("SELECT * FROM posts", function(err, row) {
-          posts.push(row);
-      }, function() {
-          // All done fetching records, render response
-          console.log(posts);
-          res.render("index.html", {posts: posts, title: 'home'});
-      });
+    db.each("SELECT * FROM posts", function(err, row) {
+      posts.push(row);
+    }, function() {
+      // All done fetching records, render response
+      console.log(posts);
+      res.render("index.html", {posts: posts, title: 'home'});
+    });
   });
 });
 
@@ -65,9 +67,6 @@ app.get('/profile', function(req, res) {
   res.render('profile.html', { title: 'profile' });
 });
 
-app.get('/login', function(req, res) {
-  res.render('login.html', { title: 'login' });
-});
 
 app.get('/about', function(req, res) {
   res.render('about.html', { title: 'about' });
@@ -88,16 +87,32 @@ app.get('/locations/:location', (req, res) => {
   let val = '';
   db.serialize(function() {
     const nameToLookup = req.params.location.toLowerCase().split('_').join(' '); // matches ':userid' above
-      db.each("SELECT * FROM posts where location = '" + nameToLookup + "' COLLATE NOCASE", function(err, row) {
-          posts.push(row);
-      }, function() {
-          // All done fetching records, render response;
-          res.send(posts);
-        //  res.render("index.html", {posts: posts, title: 'home'});
-      });
+    db.each("SELECT * FROM posts where location = '" + nameToLookup + "' COLLATE NOCASE", function(err, row) {
+      posts.push(row);
+    }, function() {
+      // All done fetching records, render response;
+      res.send(posts);
+      //  res.render("index.html", {posts: posts, title: 'home'});
     });
   });
+});
 
+/*
+ * handle GoogleYolo Login
+ */
+app.post('/idTokenLogin', (req, res) => {
+  res.flash('success', 'You have Logged-in!');
+  console.log('idTokenLogin:', req.body);
+});
+
+/*
+ * handle logout
+ */
+app.post('/logout', function(req, res) {
+  console.log('logout.');
+  // TODO: clear session
+  res.redirect('/');
+});
 
 /*
  * handle data access
@@ -148,6 +163,32 @@ app.get('/post/:postid', (req, res) => {
       });
     });
   });
+});
+
+app.post('/newpost', (req, res) => {
+  console.log(req.body);
+
+  db.run(
+    'INSERT INTO posts VALUES (NULL, $title, $img, $time, $author, $location, $content)',
+    // parameters to SQL query:
+    {
+      $title: req.body.name,
+      $location: req.body.location,
+      $img: req.body.image,
+      $content: req.body.body,
+      $time: req.body.time,
+      $author: req.body.author
+    },
+    // callback function to run when the query finishes:
+    (err) => {
+      if (err) {
+        console.log(err);
+        res.send({message: 'error in app.post(/newpost)'});
+      } else {
+        res.send({message: 'successfully run app.post(/newpost)'});
+      }
+    }
+  );
 });
 
 // start the server at URL: http://localhost:3000/

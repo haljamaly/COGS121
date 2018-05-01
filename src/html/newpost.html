@@ -28,15 +28,19 @@
 
 $(document).ready(() => {
   $('#insertButton').click(() => {
+    let time = new Date(Date.now()).toJSON();
+    console.log(time);
     $.ajax({
       // all URLs are relative to http://localhost:3000/
       url: 'newpost',
       type: 'POST', // <-- this is POST, not GET
       data: {
               name: $('#insertNameBox').val(),
-              body: $('#insertbodyBox').val(),
-              location: $('#insertlocationBox').val(),
-              image: $('#insertimageURL').val()
+              body: $('#insertBodyBox').val(),
+              location: $('#insertLocationtBox').val(),
+              image: $('#insertImageURL').val(),
+              time: time,
+              author: "Hasan"
 
             },
             success: (data) => {
