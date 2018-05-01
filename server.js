@@ -18,6 +18,26 @@ const app = express();
 const bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({extended: true}));
 
+// validate google id id token
+// https://developers.google.com/identity/one-tap/web/idtoken-auth
+const {OAuth2Client} = require('google-auth-library');
+const CLIENT_ID = '687083663797-h6rk9pcjjm2ac1kib7kcbbjqpqc2ipcg.apps.googleusercontent.com'
+const client = new OAuth2Client(CLIENT_ID);
+async function verify(token) {
+  const ticket = await client.verifyIdToken({
+      idToken: token,
+      audience: CLIENT_ID,  // Specify the CLIENT_ID of the app that accesses the backend
+      // Or, if multiple clients access the backend:
+      //[CLIENT_ID_1, CLIENT_ID_2, CLIENT_ID_3]
+  });
+  const payload = ticket.getPayload();
+  const userid = payload['sub'];
+  console.log('token veryfied');
+  // If request specified a G Suite domain:
+  //const domain = payload['hd'];
+}
+
+
 // all static files (html, js, css, img) goes into /src/
 app.use(express.static('src'));
 
@@ -27,7 +47,10 @@ app.use(cookieParser('Y76(&@GB@#H@(&))'));
 app.use(session({
   secret: 'keyboard cat',
   resave: true,
-  saveUninitialized:true
+  saveUninitialized:true,
+  cookie: {
+    maxAge: 30 * 60 * 1000 // expire time in ms
+  }
 }));
 
 // use the flash middleware
@@ -43,14 +66,17 @@ nunjucks.configure('src/html', {
  * handle routes
  */
 app.get('/', function(req, res) {
+  if (req.session.sign) {
+    console.log('signed in:', req.session);
+  }
   let posts = [];
   db.serialize(function() {
     db.each("SELECT * FROM posts", function(err, row) {
       posts.push(row);
     }, function() {
       // All done fetching records, render response
-      console.log(posts);
-      res.render("index.html", {posts: posts, title: 'home'});
+      // console.log(posts);
+      res.render("index.html", {posts: posts, title: 'home', sign: req.session.sign});
     });
   });
 });
@@ -101,8 +127,11 @@ app.get('/locations/:location', (req, res) => {
  * handle GoogleYolo Login
  */
 app.post('/idTokenLogin', (req, res) => {
-  res.flash('success', 'You have Logged-in!');
-  console.log('idTokenLogin:', req.body);
+  res.flash('info', 'You have Logged-in!');
+  // console.log('idTokenLogin:', req.body.idToken);
+  // verify the token
+  verify(req.body.idToken).catch(console.error);
+  req.session.sign = true;
 });
 
 /*
@@ -111,7 +140,7 @@ app.post('/idTokenLogin', (req, res) => {
 app.post('/logout', function(req, res) {
   console.log('logout.');
   // TODO: clear session
-  res.redirect('/');
+  req.session.sign = false;
 });
 
 /*

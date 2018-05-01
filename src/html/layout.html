@@ -14,6 +14,11 @@
   <script src="https://smartlock.google.com/client"></script>
 
   <script type="text/javascript">
+    {% if sign %}
+      window.sign = true;
+    {% else %}
+      window.sign = false;
+    {% endif %}
     function useGoogleIdTokenForAuth(idToken) {
       $.ajax({
         url : 'idTokenLogin',
@@ -32,21 +37,6 @@
       });
     }
 
-    function logout() {
-      $.ajax({
-        url : 'logout',
-        type: 'POST',
-        success: () => {
-          console.log('idTokenLogout: success');
-        }
-      });
-      // define a generic Ajax error handler:
-      // http://api.jquery.com/ajaxerror/
-      $(document).ajaxError(() => {
-        console.log('Error: unknown ajaxError during logout()');
-      });
-    }
-
     const PUBLIC_CLIENT_ID = '687083663797-h6rk9pcjjm2ac1kib7kcbbjqpqc2ipcg.apps.googleusercontent.com'
     // CONFIG documentation: https://developers.google.com/identity/one-tap/web/retrieve-credentials
     const CONFIG = {
@@ -62,8 +52,12 @@
     };
     // onLoad callback, try to retrieve credential
     window.onGoogleYoloLoad = (googleyolo) => {
-
       console.log("GoogleYolo loaded.");
+
+      if (window.sign) {
+        console.log('signed in, escape');
+        return;
+      }
       const retrievePromise = googleyolo.retrieve(CONFIG);
       // The googleyolo.retrieve() method returns a Promise that resolves when
       // the request has completed. Attach a resolution function to the Promise
@@ -117,7 +111,19 @@
           // Auto sign-in disabled.
           console.log('Logout: Auto sign-in disabled.');
         });
-        logout();
+        $.ajax({
+          url : 'logout',
+          type: 'POST',
+          success: () => {
+            console.log('logout: success');
+            console.log(window.sign);
+          }
+        });
+        // define a generic Ajax error handler:
+        // http://api.jquery.com/ajaxerror/
+        $(document).ajaxError(() => {
+          console.log('Error: unknown ajaxError during logout()');
+        });
       });
     });
 
@@ -146,8 +152,8 @@
               <ul class="dropdown-menu">
                 <li><a href="/profile">View my profile</a></li>
                 <!-- TODO: conditional on login/logout -->
-                <li><a id="loginNav">Login</a></li>
-                <li><a id="logoutNav">Logout</a></li>
+                <li><a id="loginNav" {% if sign %}{% else %}style="display: none"{% endif %}>Login</a></li>
+                <li><a id="logoutNav" {% if sign %}style="display: none"{% else %}{% endif %}>Logout</a></li>
               </ul>
             </li>
             <li {% if title == "about" %} class='active' {% endif %}>
