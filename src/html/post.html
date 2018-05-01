@@ -1,5 +1,39 @@
 {% extends 'layout.html' %}
 {% block body %}
+
+<script type="text/javascript">
+
+$(document).ready(() => {
+  $('#submitBtn').click(() => {
+    const requestURL = 'post/' + $('#post_pid').val();
+    console.log('making ajax request to:', requestURL);
+    $.ajax({
+      // all URLs are relative to http://localhost:3000/
+      url: requestURL,
+      type: 'POST', // <-- this is POST, not GET
+      data: {
+              name: $('#comment').val(),
+
+            },
+            success: (data) => {
+              $('#status').html(data.message);
+            }
+          });
+        });
+
+    $('#resetBtn').click(() => {
+      document.getElementById("comment").reset();
+
+    });
+        // define a generic Ajax error handler:
+        // http://api.jquery.com/ajaxerror/
+        $(document).ajaxError(() => {
+          $('#status').html('Error: unknown ajaxError!');
+        });
+      });
+</script>
+
+<div id=post_pid style="display: none">{{pid}}</div>
 <div id="primary_img">
   <img src="{{ img }}" width="100%"/>
 </div>
@@ -22,16 +56,16 @@
 <hr/>
 <h1><strong>Comment</strong></h1>
 <form id="comment">
-  <textarea rows="4" style="width: 80%">
+  <textarea rows="4" style="width: 100%">
   </textarea>
   <br/>
-  <button class="btn btn-primary" type="submit">Submit Comment</button>
-  <button class="btn btn-info" type="reset">Clear</button>
+  <button id="submitBtn" class="btn btn-primary" type="submit">Submit Comment</button>
+  <button id="resetBtn"class="btn btn-info" type="reset">Clear</button>
 </form>
 
 <hr/>
 <footer>
-  <h4>Some footer</h4>
+  <h4>Thanks for using Here-n-There!</h4>
 </footer>
 
 {% endblock %}
