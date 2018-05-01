@@ -150,6 +150,32 @@ app.get('/post/:postid', (req, res) => {
   });
 });
 
+app.post('/newpost', (req, res) => {
+  console.log(req.body);
+
+  db.run(
+    'INSERT INTO posts VALUES (NULL, $title, $img, $time, $author, $location, $content)',
+    // parameters to SQL query:
+    {
+      $title: req.body.name,
+      $location: req.body.location,
+      $img: req.body.image,
+      $content: req.body.body,
+      $time: req.body.time,
+      $author: req.body.author
+    },
+    // callback function to run when the query finishes:
+    (err) => {
+      if (err) {
+        console.log(err);
+        res.send({message: 'error in app.post(/newpost)'});
+      } else {
+        res.send({message: 'successfully run app.post(/newpost)'});
+      }
+    }
+  );
+});
+
 // start the server at URL: http://localhost:3000/
 app.listen(3000, () => {
   console.log('Server started at http://localhost:3000/');
