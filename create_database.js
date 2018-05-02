@@ -19,9 +19,9 @@ const db = new sqlite3.Database('app.db');
 //  which we don't want)
 db.serialize(() => {
   // create a new database table:
-  db.run("CREATE TABLE users (uid text PRIMARY KEY, name text NOT NULL, img text)");
+  db.run("CREATE TABLE users (uid INTEGER PRIMARY KEY AUTOINCREMENT, name text NOT NULL, img text)");
   db.run("CREATE TABLE wishlist (user text NOT NULL, location text NOT NULL)");
-  db.run("CREATE TABLE posts (pid INTEGER PRIMARY KEY AUTOINCREMENT, title text NOT NULL, img text, time text, author text NOT NULL, location text NOT NULL COLLATE NOCASE, content text NOT NULL)");
+  db.run("CREATE TABLE posts (pid INTEGER PRIMARY KEY AUTOINCREMENT, title text NOT NULL, img text NOT NULL, time text, author text NOT NULL, location text NOT NULL COLLATE NOCASE, content text NOT NULL)");
   db.run("CREATE TABLE locations (title text PRIMARY KEY, score integer NOT NULL)");
 
   // insert 3 rows of data:
