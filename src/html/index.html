@@ -2,24 +2,43 @@
 {% block body %}
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
 <style>
-  .pics{
-    display: -webkit-flex;
-    width: 80%;
-    max-width: 500px;
-    -webkit-flex-wrap: wrap; /* Safari 6.1+ */
+
+  .flex-container{
+    width: 100%;
     display: flex;
-    flex-wrap: wrap;
+    flex-flow: wrap;
+    margin: 0 -5px;
+  }
+  .flex-container>* {
+    flex: 0 0 33.3333%;
   }
  .allpics {
-    max-width: 100%;
+    max-width: 80%;
     height: auto;
-  }
+    margin: 0 3px;
+    }
+    a.button {
+        -webkit-appearance: button;
+        -moz-appearance: button;
+        appearance: button;
+        text-decoration: none;
+        color: initial;
+        position:absolute;  // absolutely positioned
+        top:50px; right:100px;
+        font: bold 11px Arial;
+        background-color: #EEEEEE;
+        color: #333333;
+        padding: 2px 6px 2px 6px;
+        border-top: 1px solid #CCCCCC;
+        border-right: 1px solid #333333;
+        border-bottom: 1px solid #333333;
+        border-left: 1px solid #CCCCCC;
+    }
   .zoom {
     transition: transform .2s; /* Animation */
   }
   .zoom:hover {
     transform: scale(1.1); /* (150% zoom - Note: if the zoom is too large, it will go outside of the viewport) */
-
   }
 </style>
 <!-- jQuery library -->
@@ -84,32 +103,42 @@ $(document).ready(() => {
 </script>
 
 <h1>Welcome to Here-n-There!</h1>
+<a href="/newpost" class="button">New Post</a>
 
 <hr/>
 <iframe
 src="https://www.google.com/maps/embed?pb=!1m10!1m8!1m3!1d49921682.98558856!2d-1.219544210558942!3d40.20955851951437!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2sus!4v1524440040796 &key=AIzaSyAgZAsmAyovxVeCtAyXFUJ42hQxphw9YEY"
 width="80%" height="400" frameborder="0" style="border:0" allowfullscreen></iframe>
+<div class="col-xs-3">
+  <h2>Stats</h2>
+</div>
+<div class="col-xs-3">
+  <h2>Top Locations</h2>
+</div>
+</div>
 <hr/>
+
+
+
 <div class="row">
-  <div class="col-xs-6 gallery">
+  <div class="col-xs-1"></div>
+  <div class="col-xs-10 gallery text-center">
     <h1>Gallery</h1>
     <input id="locationBox" type="text" size="20"/>
-    <button id="filterButton">Filter Location</button>
+    <button id="filterButton">Go to Location!</button>
+  </div>
+</div>
+<div class="row">
+  <div class="gallery">
     <br>
     <br>
-    <div id="pics" class="flex-container">
+    <div id="pics" class="flex-container text-center">
       {% for post in posts %}
         <div class="zoom"><a class="alllinks" href="/post/{{post.pid}}"><img class="allpics" src="{{post.img}}"/></a></div>
       {% endfor %}
     </div>
   </div>
-  <div class="col-xs-3">
-    <h2>Stats</h2>
-  </div>
-  <div class="col-xs-3">
-    <h2>Top Locations</h2>
-  </div>
 </div>
+<div class="col-xs-1"></div>
 <div id="status"></div>
-
 {% endblock %}
