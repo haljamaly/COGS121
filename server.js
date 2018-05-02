@@ -84,20 +84,28 @@ app.get('/', function(req, res) {
 });
 
 app.get('/newpost', function(req, res) {
-  res.render('newpost.html', { title: 'newposts' });
+  const signedInUser = req.session.signedInUser;
+  const isSignedIn = !!signedInUser;
+  res.render('newpost.html', { title: 'newposts', signedInUser: signedInUser, isSignedIn: isSignedIn || 0});
 });
 
 app.get('/locations', function(req, res) {
-  res.render('locations.html', { title: 'locations' });
+  const signedInUser = req.session.signedInUser;
+  const isSignedIn = !!signedInUser;
+  res.render('locations.html', { title: 'locations', signedInUser: signedInUser, isSignedIn: isSignedIn || 0});
 });
 
 app.get('/profile', function(req, res) {
-  res.render('profile.html', { title: 'profile' });
+  const signedInUser = req.session.signedInUser;
+  const isSignedIn = !!signedInUser;
+  res.render('profile.html', { title: 'profile', signedInUser: signedInUser, isSignedIn: isSignedIn || 0});
 });
 
 
 app.get('/about', function(req, res) {
-  res.render('about.html', { title: 'about' });
+  const signedInUser = req.session.signedInUser;
+  const isSignedIn = !!signedInUser;
+  res.render('about.html', { title: 'about', signedInUser: signedInUser, isSignedIn: isSignedIn || 0});
 });
 
 // for testing flash message
@@ -136,6 +144,7 @@ app.post('/idTokenLogin', (req, res) => {
     console.log('verify callback');
     req.session.signedInUser = 2;
     res.flash('info', 'You have Logged-in!');
+    res.redirect('/');
   });
 
 });
