@@ -1,41 +1,15 @@
 {% extends 'layout.html' %}
 {% block body %}
 <style>
-  .button {
-      background-color: #4CAF50; /* Green */
-      border: none;
-      color: white;
-      padding: 16px 32px;
-      text-align: center;
-      text-decoration: none;
-      display: inline-block;
-      font-size: 16px;
-      margin: 4px 2px;
-      -webkit-transition-duration: 0.4s; /* Safari */
-      transition-duration: 0.4s;
-      cursor: pointer;
-  }
-
-  .buttonpost {
-      background-color: white;
-      color: black;
-      border: 2px solid #f44336;
-  }
-
-  .buttonpost:hover {
-      background-color: #f44336;
-      color: white;
-  }
-
-  .flex-container{
+  .pics{
+    display: -webkit-flex;
+    width: 80%;
+    max-width: 500px;
+    -webkit-flex-wrap: wrap; /* Safari 6.1+ */
     display: flex;
-    flex-flow: wrap;
-    margin: 0 -5px;
+    flex-wrap: wrap;
   }
-  .flex-container>* {
-    flex: 0 0 33.3333%;
-  }
-  .allpics {
+ .allpics {
     max-width: 100%;
     height: 200px;
     margin: 1px 1px 1px 1px;
@@ -57,16 +31,25 @@
     border-bottom: 1px solid #333333;
     border-left: 1px solid #CCCCCC;
   }
+
   .zoom {
     transition: transform .2s; /* Animation */
   }
   .zoom:hover {
     transform: scale(1.1); /* (150% zoom - Note: if the zoom is too large, it will go outside of the viewport) */
+
   }
 </style>
+<!-- jQuery library -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 
+<!-- Latest compiled JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 <script type="text/javascript">
 
+
+// below is copied from PetsApp-v1 for COGS121 by Philip Guo
+// https://github.com/pgbovine/COGS121
 $(document).ready(() => {
   $('#filterButton').click(() => {
     const requestURL = '../locations/' + $('#locationBox').val().toLowerCase().split(' ').join('_');
@@ -84,9 +67,9 @@ $(document).ready(() => {
         console.log('You received some data!', data);
         console.log(data.length);
         if (data) {
-          $('.zoom').remove();
+          $('.alllinks').remove();
           for (i = 0; i < data.length; ++i) {
-            $("#pics").append('<div class="zoom"><a class="alllinks" href="/post/' + data[i].pid + '"><img class="allpics" src="' + data[i].img + '"></a></div>' );
+            $("#pics").append('<a class="alllinks" href="/post/' + data[i].pid + '"><img class="allpics" src="' + data[i].img + '"></a>' );
           }
         } else {
           $("#pics").append('<span class="alllinks"> Invalid search man! </span>' );
@@ -114,53 +97,37 @@ $(document).ready(() => {
     console.log('Error: unknown ajaxError!');
   });
 
-  //$('.dropdown-toggle').dropdown();
+  $('.dropdown-toggle').dropdown();
 });
 </script>
 
-<div class="row">
-  <div class="col-10">
-    <h1>Welcome to Here-n-There!</h1>
-  </div>
-  <div class="col-2">
-    <a href="/newpost"><button class="button buttonpost">New Post</button></a>
-  </div>
-</div>
-<hr/>
-<div class="row">
-  <div class="col-10">
-    <iframe src="https://www.google.com/maps/embed?pb=!1m10!1m8!1m3!1d49921682.98558856!2d-1.219544210558942!3d40.20955851951437!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2sus!4v1524440040796 &key=AIzaSyAgZAsmAyovxVeCtAyXFUJ42hQxphw9YEY" width="100%" height="400" frameborder="0" style="border:0" allowfullscreen></iframe>
-  </div>
-  <div class="col-2">
-    <div class="row text-center">
-      <h2>Stats</h2>
-    </div>
-    <hr/>
-    <div class="row text-center">
-      <h2>Top Locations</h2>
-    </div>
-  </div>
-</div>
-<hr/>
+<h1>Welcome to Here-n-There!</h1>
 
+<hr/>
+<iframe
+src="https://www.google.com/maps/embed?pb=!1m10!1m8!1m3!1d49921682.98558856!2d-1.219544210558942!3d40.20955851951437!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2sus!4v1524440040796 &key=AIzaSyAgZAsmAyovxVeCtAyXFUJ42hQxphw9YEY"
+width="80%" height="400" frameborder="0" style="border:0" allowfullscreen></iframe>
+<hr/>
 <div class="row">
-  <div class="col-10 gallery text-center">
+  <div class="col-xs-6 gallery">
     <h1>Gallery</h1>
     <input id="locationBox" type="text" size="20"/>
-    <button id="filterButton">Look up Location!</button>
-  </div>
-</div>
-<div class="row">
-  <div class="gallery">
+    <button id="filterButton">Filter Location</button>
     <br>
     <br>
-    <div id="pics" class="flex-container text-center">
+    <div id="pics" class="flex-container">
       {% for post in posts %}
         <div class="zoom"><a class="alllinks" href="/post/{{post.pid}}"><img class="allpics" src="{{post.img}}"/></a></div>
       {% endfor %}
     </div>
   </div>
+  <div class="col-xs-3">
+    <h2>Stats</h2>
+  </div>
+  <div class="col-xs-3">
+    <h2>Top Locations</h2>
+  </div>
 </div>
-<div class="col-1"></div>
 <div id="status"></div>
+
 {% endblock %}
