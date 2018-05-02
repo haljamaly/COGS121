@@ -1,13 +1,35 @@
 {% extends 'layout.html' %}
 {% block body %}
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+<style>
+  .pics{
+    display: -webkit-flex;
+    width: 80%;
+    max-width: 500px;
+    -webkit-flex-wrap: wrap; /* Safari 6.1+ */
+    display: flex;
+    flex-wrap: wrap;
+  }
+ .allpics {
+    max-width: 100%;
+    height: auto;
+  }
+  .zoom {
+    transition: transform .2s; /* Animation */
+  }
+  .zoom:hover {
+    transform: scale(1.1); /* (150% zoom - Note: if the zoom is too large, it will go outside of the viewport) */
 
+  }
+</style>
 <!-- jQuery library -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 
 <!-- Latest compiled JavaScript -->
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 <script type="text/javascript">
+
+
 // below is copied from PetsApp-v1 for COGS121 by Philip Guo
 // https://github.com/pgbovine/COGS121
 $(document).ready(() => {
@@ -29,7 +51,7 @@ $(document).ready(() => {
         if (data) {
           $('.alllinks').remove();
           for (i = 0; i < data.length; ++i) {
-            $("#pics").append('<a class="alllinks" href="/post/' + data[i].pid + '"><img src="' + data[i].img + '"></a>' );
+            $("#pics").append('<a class="alllinks" href="/post/' + data[i].pid + '"><img class="allpics" src="' + data[i].img + '"></a>' );
           }
         } else {
           $("#pics").append('<span class="alllinks"> Invalid search man! </span>' );
@@ -73,9 +95,11 @@ width="80%" height="400" frameborder="0" style="border:0" allowfullscreen></ifra
     <h1>Gallery</h1>
     <input id="locationBox" type="text" size="20"/>
     <button id="filterButton">Filter Location</button>
-    <div id="pics">
+    <br>
+    <br>
+    <div id="pics" class="flex-container">
       {% for post in posts %}
-        <a class="alllinks" href="/post/{{post.pid}}"><img class="allpics" src="{{post.img}}"/></a>
+        <div class="zoom"><a class="alllinks" href="/post/{{post.pid}}"><img class="allpics" src="{{post.img}}"/></a></div>
       {% endfor %}
     </div>
   </div>
