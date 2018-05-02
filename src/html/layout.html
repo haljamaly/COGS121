@@ -42,7 +42,6 @@
           console.log('idTokenLogin: success');
           $('#loginNav').hide();
           $('#logoutNav').show();
-          $('#avatar').attr('src', '/img/sponge.jpg');
           //window.location.reload();
 
         }
@@ -110,11 +109,9 @@
       if (window.isSignedIn) {
         $('#loginNav').hide();
         $('#logoutNav').show();
-        $('#avatar').attr('src', '/img/sponge.jpg');
       } else {
         $('#loginNav').show();
         $('#logoutNav').hide();
-        $('#avatar').attr('src', '/img/squidward.jpg');
       }
       $('#loginNav').click(() => {
         googleyolo.hint(CONFIG).then((credential) => {
@@ -140,7 +137,6 @@
             console.log('/logout POST success');
             $('#loginNav').show();
             $('#logoutNav').hide();
-            $('#avatar').attr('src', '/img/squidward.jpg');
             //window.location.reload();
           }
         });
@@ -173,7 +169,7 @@
         <ul class="navbar-nav ml-auto">
           <li class="nav-item dropdown">
             <a class="dropdown-toggle" id='dropdownToggle' href='#' data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-              <img id="avatar" src="/img/squidward.jpg" alt="Avatar" style="border-radius: 50%; height: 3em;">
+              <img src="/img/meme.jpg" alt="Avatar" style="border-radius: 50%; height: 3em;">
               <scan class="caret"></scan>
             </a>
             <div class="dropdown-menu" role="menu" aria-labelledby="dropdownToggle">
