@@ -144,7 +144,6 @@ app.post('/idTokenLogin', (req, res) => {
     console.log('verify callback');
     req.session.signedInUser = 2;
     res.flash('info', 'You have Logged-in!');
-    // TODO: figure out what's the real res call
     res.redirect('/');
   });
 
@@ -158,8 +157,6 @@ app.post('/logout', function(req, res) {
   req.session.destroy((err) => {
     console.log(err);
   });
-  // TODO: figure out what's the real res call
-  res.redirect('/');
 });
 
 /*
