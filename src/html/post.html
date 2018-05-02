@@ -5,21 +5,21 @@
 
 $(document).ready(() => {
   $('#submitBtn').click(() => {
-    const requestURL = 'post/' + $('#post_pid').val();
+    const requestURL = 'post/' + {{pid}};
     console.log('making ajax request to:', requestURL);
+    // TODO: This URL right now is root/post/post/PID, which is not right.
     $.ajax({
       // all URLs are relative to http://localhost:3000/
       url: requestURL,
       type: 'POST', // <-- this is POST, not GET
       data: {
-              name: $('#comment').val(),
-
-            },
-            success: (data) => {
-              $('#status').html(data.message);
-            }
-          });
-        });
+        name: $('#comment_text').val(),
+      },
+      success: (data) => {
+        $('#status').html(data.message);
+      }
+    });
+  });
 
     $('#resetBtn').click(() => {
       document.getElementById("comment").reset();
@@ -33,7 +33,6 @@ $(document).ready(() => {
       });
 </script>
 
-<div id=post_pid style="display: none">{{pid}}</div>
 <div id="primary_img">
   <img src="{{ img }}" width="100%"/>
 </div>
@@ -55,13 +54,12 @@ $(document).ready(() => {
 </div>
 <hr/>
 <h1><strong>Comment</strong></h1>
-<form id="comment">
-  <textarea rows="4" style="width: 100%">
+<div id="comment">
+  <textarea id="comment_text" rows="4" style="width: 100%">
   </textarea>
   <br/>
-  <button id="submitBtn" class="btn btn-primary" type="submit">Submit Comment</button>
-  <button id="resetBtn"class="btn btn-info" type="reset">Clear</button>
-</form>
+  <button id="submitBtn" class="btn btn-primary">Submit Comment</button>
+</div>
 
 <hr/>
 <footer>

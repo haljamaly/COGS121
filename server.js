@@ -66,23 +66,25 @@ nunjucks.configure('src/html', {
  * handle routes
  */
 app.get('/', function(req, res) {
-  if (req.session.sign) {
-    console.log('signed in:', req.session);
+  if (req.session.signedInUser) {
+    // console.log('signed in:', req.session);
   }
-  let posts = [];
+  const posts = [];
   db.serialize(function() {
     db.each("SELECT * FROM posts", function(err, row) {
       posts.push(row);
     }, function() {
       // All done fetching records, render response
       // console.log(posts);
-      res.render("index.html", {posts: posts, title: 'home', sign: req.session.sign});
+      const signedInUser = req.session.signedInUser;
+      const isSignedIn = !!signedInUser;
+      res.render("index.html", {posts: posts, title: 'home', signedInUser: signedInUser, isSignedIn: isSignedIn || 0});
     });
   });
 });
 
 app.get('/newpost', function(req, res) {
-  res.render('newpost.html', { title: 'posts' });
+  res.render('newpost.html', { title: 'newposts' });
 });
 
 app.get('/locations', function(req, res) {
@@ -127,20 +129,25 @@ app.get('/locations/:location', (req, res) => {
  * handle GoogleYolo Login
  */
 app.post('/idTokenLogin', (req, res) => {
-  res.flash('info', 'You have Logged-in!');
+
   // console.log('idTokenLogin:', req.body.idToken);
   // verify the token
-  verify(req.body.idToken).catch(console.error);
-  req.session.sign = true;
+  verify(req.body.idToken).catch(console.error).then((e) => {
+    console.log('verify callback');
+    req.session.signedInUser = 2;
+    res.flash('info', 'You have Logged-in!');
+  });
+
 });
 
 /*
  * handle logout
  */
 app.post('/logout', function(req, res) {
-  console.log('logout.');
-  // TODO: clear session
-  req.session.sign = false;
+  console.log('/logout with POST method');
+  req.session.destroy((err) => {
+    console.log(err);
+  });
 });
 
 /*
