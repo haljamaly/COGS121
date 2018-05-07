@@ -17,6 +17,7 @@
   <script src="http://mozilla.github.io/nunjucks/files/nunjucks.min.js"></script>
 
   <!-- Traditional Google Sign-in -->
+  <!-- reference: https://developers.google.com/identity/sign-in/web/sign-in -->
   <script src="https://apis.google.com/js/platform.js" async defer></script>
 
   <script type="text/javascript">
@@ -30,6 +31,10 @@
     });
 
     function onSignIn(googleUser) {
+      if (window.isSignedIn) {
+        console.log('isSignedIn: escape onSignIn()');
+        return;
+      }
       // Useful data for your client-side scripts:
       const profile = googleUser.getBasicProfile();
       console.log("ID: " + profile.getId());
@@ -41,19 +46,18 @@
 
       // The ID token you need to pass to your backend:
       const id_token = googleUser.getAuthResponse().id_token;
-      const id = profile.getId();
+      const google_id = profile.getId();
       $.ajax({
         url : 'idTokenLogin',
         type: 'POST',
         data: {
           idToken: id_token,
-          id: id
+          google_id: google_id
         },
         success: (data) => {
           console.log('Login ajax: success');
-          $('#loginNav').hide();
-          $('#logoutNav').show();
-          //window.location.reload();
+          console.log(data);
+          window.location.reload();
         }
       });
     };
@@ -77,9 +81,7 @@
           type: 'POST',
           success: () => {
             console.log('/logout ajax POST success');
-            $('#loginNav').show();
-            $('#logoutNav').hide();
-            //window.location.reload();
+            window.location.reload();
           }
         });
       });
@@ -111,7 +113,7 @@
         <ul class="navbar-nav ml-auto">
           <li class="nav-item dropdown">
             <a class="dropdown-toggle" id='dropdownToggle' href='#' data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-              <img src="/img/meme.jpg" alt="Avatar" style="border-radius: 50%; height: 3em;">
+              <img id="avatar" src="{{ avatar }}" alt="Avatar" style="border-radius: 50%; height: 3em;">
               <scan class="caret"></scan>
             </a>
             <div class="dropdown-menu" role="menu" aria-labelledby="dropdownToggle">

@@ -75,7 +75,8 @@ app.get('/', function(req, res) {
       // console.log(posts);
       const signedInUser = req.session.signedInUser;
       const isSignedIn = !!signedInUser;
-      res.render("index.html", {posts: posts, title: 'home', signedInUser: signedInUser || '', isSignedIn: isSignedIn || 0});
+      const avatar = isSignedIn ? signedInUser.img : '/img/meme.jpg';
+      res.render("index.html", {posts: posts, title: 'home', avatar: avatar, isSignedIn: isSignedIn || 0});
     });
   });
 });
@@ -83,26 +84,30 @@ app.get('/', function(req, res) {
 app.get('/newpost', function(req, res) {
   const signedInUser = req.session.signedInUser;
   const isSignedIn = !!signedInUser;
-  res.render('newpost.html', { title: 'newposts', isSignedIn: isSignedIn || 0});
+  const avatar = isSignedIn ? signedInUser.img : '/img/meme.jpg';
+  res.render('newpost.html', { title: 'newposts', avatar: avatar, isSignedIn: isSignedIn || 0});
 });
 
 app.get('/locations', function(req, res) {
   const signedInUser = req.session.signedInUser;
   const isSignedIn = !!signedInUser;
-  res.render('locations.html', { title: 'locations', isSignedIn: isSignedIn || 0});
+  const avatar = isSignedIn ? signedInUser.img : '/img/meme.jpg';
+  res.render('locations.html', { title: 'locations', avatar: avatar, isSignedIn: isSignedIn || 0});
 });
 
 app.get('/profile', function(req, res) {
   const signedInUser = req.session.signedInUser;
   const isSignedIn = !!signedInUser;
-  res.render('profile.html', { title: 'profile', isSignedIn: isSignedIn || 0});
+  const avatar = isSignedIn ? signedInUser.img : '/img/meme.jpg';
+  res.render('profile.html', { title: 'profile', avatar: avatar, isSignedIn: isSignedIn || 0});
 });
 
 
 app.get('/about', function(req, res) {
   const signedInUser = req.session.signedInUser;
   const isSignedIn = !!signedInUser;
-  res.render('about.html', { title: 'about', isSignedIn: isSignedIn || 0});
+  const avatar = isSignedIn ? signedInUser.img : '/img/meme.jpg';
+  res.render('about.html', { title: 'about', avatar: avatar, isSignedIn: isSignedIn || 0});
 });
 
 // for testing flash message
@@ -116,11 +121,10 @@ app.get('/flash', function(req, res){
 
 app.get('/locations/:location', (req, res) => {
   let posts = [];
-  const nameToLookup = req.params.location.toLowerCase().split('_').join(' '); // matches ':userid' above
+  const locationToLookup = req.params.location.toLowerCase().split('_').join(' '); // matches ':location' above
   let val = '';
   db.serialize(function() {
-    const nameToLookup = req.params.location.toLowerCase().split('_').join(' '); // matches ':userid' above
-    db.each("SELECT * FROM posts where location = '" + nameToLookup + "' COLLATE NOCASE", function(err, row) {
+    db.each("SELECT * FROM posts where location = '" + locationToLookup + "' COLLATE NOCASE", function(err, row) {
       posts.push(row);
     }, function() {
       // All done fetching records, render response;
@@ -131,17 +135,29 @@ app.get('/locations/:location', (req, res) => {
 });
 
 /*
- * handle GoogleYolo Login
+ * handle Google sign-in
+ * https://developers.google.com/identity/sign-in/web/sign-in
  */
 app.post('/idTokenLogin', (req, res) => {
-  const token = req.body.idToken;
-  const id = req.body.id;
-  // console.log('idTokenLogin:', req.body.idToken);
+  const idToken = req.body.idToken;
+  const google_id = req.body.google_id;
   // verify the token
-  verify(token).catch(console.error).then((e) => {
+  verify(idToken).catch(console.error).then((e) => {
     console.log('verify callback');
-    req.session.signedInUser = id;
-    res.send({id});
+    req.session.signedInUser = {google_id: google_id};
+    db.each("SELECT * FROM users where google_id = '" + google_id + "'",
+      // callback when query finished
+      (err, row) => {
+        if (err) {
+          console.log('login err: no match found in user database');
+          res.send({google_id: google_id});
+        } else {
+          // console.log('login acquired:', row);
+          req.session.signedInUser = Object.assign(req.session.signedInUser, row);
+          res.send(req.session.signedInUser);
+        }
+      }
+    );
   });
 
 });
@@ -196,14 +212,14 @@ app.get('/post/:postid', (req, res) => {
   let val = '';
   db.serialize(function() {
     const postid = req.params.postid; // matches ':userid' above
-      db.each("SELECT * FROM posts where pid = '" + postid + "'", function(err, row) {
-          post.push(row);
+    db.each("SELECT * FROM posts where pid = '" + postid + "'", function(err, row) {
+      post.push(row);
+    }, function() {
+      db.each("SELECT name FROM users where uid = '" + post[0].author + "'", function(err, row) {
+        post[0].author = row.name;
       }, function() {
-        db.each("SELECT name FROM users where uid = '" + post[0].author + "'", function(err, row) {
-          post[0].author = row.name;
-        }, function() {
-          // All done fetching records, render response;
-          res.render("post.html", post[0]);
+        // All done fetching records, render response;
+        res.render("post.html", post[0]);
         //  res.render("index.html", {posts: posts, title: 'home'});
       });
     });

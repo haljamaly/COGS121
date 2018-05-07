@@ -19,15 +19,15 @@ const db = new sqlite3.Database('app.db');
 //  which we don't want)
 db.serialize(() => {
   // create a new database table:
-  db.run("CREATE TABLE users (uid INTEGER PRIMARY KEY AUTOINCREMENT, name text NOT NULL, img text)");
+  db.run("CREATE TABLE users (uid INTEGER PRIMARY KEY AUTOINCREMENT, name text NOT NULL, img text, google_id text)");
   db.run("CREATE TABLE wishlist (user text NOT NULL, location text NOT NULL)");
   db.run("CREATE TABLE posts (pid INTEGER PRIMARY KEY AUTOINCREMENT, title text NOT NULL, img text NOT NULL, time text, author text NOT NULL, location text NOT NULL COLLATE NOCASE, content text NOT NULL)");
   db.run("CREATE TABLE locations (title text PRIMARY KEY, score integer NOT NULL)");
 
   // insert 3 rows of data:
-  db.run("INSERT INTO users VALUES ('1', 'Hasan', 'src/img/hasan.jpg')");
-  db.run("INSERT INTO users VALUES ('2', 'Shuyuan', 'src/img/shuyuan.jpg')");
-  db.run("INSERT INTO users VALUES ('3', 'Dom', 'src/img/dom.jpg')");
+  db.run("INSERT INTO users VALUES ('1', 'Hasan', '/img/hasan.jpg', '')");
+  db.run("INSERT INTO users VALUES ('2', 'Shuyuan', '/img/shuyuan.jpg', '115171345662424295181')");
+  db.run("INSERT INTO users VALUES ('3', 'Dom', '/img/dom.jpg', '')");
 
   db.run("INSERT INTO wishlist VALUES ('1', 'Los Angeles')");
   db.run("INSERT INTO wishlist VALUES ('3', 'New York')");
