@@ -66,9 +66,6 @@ nunjucks.configure('src/html', {
  * handle routes
  */
 app.get('/', function(req, res) {
-  if (req.session.signedInUser) {
-    // console.log('signed in:', req.session);
-  }
   const posts = [];
   db.serialize(function() {
     db.each("SELECT * FROM posts", function(err, row) {
@@ -78,7 +75,7 @@ app.get('/', function(req, res) {
       // console.log(posts);
       const signedInUser = req.session.signedInUser;
       const isSignedIn = !!signedInUser;
-      res.render("index.html", {posts: posts, title: 'home', signedInUser: signedInUser, isSignedIn: isSignedIn || 0});
+      res.render("index.html", {posts: posts, title: 'home', signedInUser: signedInUser || '', isSignedIn: isSignedIn || 0});
     });
   });
 });
@@ -86,26 +83,26 @@ app.get('/', function(req, res) {
 app.get('/newpost', function(req, res) {
   const signedInUser = req.session.signedInUser;
   const isSignedIn = !!signedInUser;
-  res.render('newpost.html', { title: 'newposts', signedInUser: signedInUser, isSignedIn: isSignedIn || 0});
+  res.render('newpost.html', { title: 'newposts', isSignedIn: isSignedIn || 0});
 });
 
 app.get('/locations', function(req, res) {
   const signedInUser = req.session.signedInUser;
   const isSignedIn = !!signedInUser;
-  res.render('locations.html', { title: 'locations', signedInUser: signedInUser, isSignedIn: isSignedIn || 0});
+  res.render('locations.html', { title: 'locations', isSignedIn: isSignedIn || 0});
 });
 
 app.get('/profile', function(req, res) {
   const signedInUser = req.session.signedInUser;
   const isSignedIn = !!signedInUser;
-  res.render('profile.html', { title: 'profile', signedInUser: signedInUser, isSignedIn: isSignedIn || 0});
+  res.render('profile.html', { title: 'profile', isSignedIn: isSignedIn || 0});
 });
 
 
 app.get('/about', function(req, res) {
   const signedInUser = req.session.signedInUser;
   const isSignedIn = !!signedInUser;
-  res.render('about.html', { title: 'about', signedInUser: signedInUser, isSignedIn: isSignedIn || 0});
+  res.render('about.html', { title: 'about', isSignedIn: isSignedIn || 0});
 });
 
 // for testing flash message
@@ -137,14 +134,14 @@ app.get('/locations/:location', (req, res) => {
  * handle GoogleYolo Login
  */
 app.post('/idTokenLogin', (req, res) => {
-
+  const token = req.body.idToken;
+  const id = req.body.id;
   // console.log('idTokenLogin:', req.body.idToken);
   // verify the token
-  verify(req.body.idToken).catch(console.error).then((e) => {
+  verify(token).catch(console.error).then((e) => {
     console.log('verify callback');
-    req.session.signedInUser = 2;
-    res.flash('info', 'You have Logged-in!');
-    res.redirect('/');
+    req.session.signedInUser = id;
+    res.send({id});
   });
 
 });
@@ -155,8 +152,11 @@ app.post('/idTokenLogin', (req, res) => {
 app.post('/logout', function(req, res) {
   console.log('/logout with POST method');
   req.session.destroy((err) => {
-    console.log(err);
+    if (err) {
+      console.log('logout err:', err);
+    }
   });
+  res.send();
 });
 
 /*

@@ -4,7 +4,7 @@
   <title>{{title}}</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
+  <meta name="google-signin-client_id" content="687083663797-h6rk9pcjjm2ac1kib7kcbbjqpqc2ipcg.apps.googleusercontent.com">
   <!-- Bootstrap -->
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
 
@@ -14,16 +14,14 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
 
 
-
   <script src="http://mozilla.github.io/nunjucks/files/nunjucks.min.js"></script>
 
-  <!-- Google One-tap sign-up and auto sign-in on websites
-       https://developers.google.com/identity/one-tap/web/get-started -->
-  <script src="https://smartlock.google.com/client"></script>
+  <!-- Traditional Google Sign-in -->
+  <script src="https://apis.google.com/js/platform.js" async defer></script>
 
   <script type="text/javascript">
     window.isSignedIn = {{ isSignedIn }};
-    console.log('isSignedIn: ', {{ isSignedIn }});
+    console.log('isSignedIn: ', window.isSignedIn);
 
     // define a generic Ajax error handler:
     // http://api.jquery.com/ajaxerror/
@@ -31,77 +29,32 @@
       console.log('Error: unknown ajaxError');
     });
 
-    function useGoogleIdTokenForAuth(idToken) {
+    function onSignIn(googleUser) {
+      // Useful data for your client-side scripts:
+      const profile = googleUser.getBasicProfile();
+      console.log("ID: " + profile.getId());
+      console.log('Full Name: ' + profile.getName());
+      console.log('Given Name: ' + profile.getGivenName());
+      console.log('Family Name: ' + profile.getFamilyName());
+      console.log("Image URL: " + profile.getImageUrl());
+      console.log("Email: " + profile.getEmail());
+
+      // The ID token you need to pass to your backend:
+      const id_token = googleUser.getAuthResponse().id_token;
+      const id = profile.getId();
       $.ajax({
         url : 'idTokenLogin',
         type: 'POST',
         data: {
-          idToken: idToken
+          idToken: id_token,
+          id: id
         },
         success: (data) => {
-          console.log('idTokenLogin: success');
+          console.log('Login ajax: success');
           $('#loginNav').hide();
           $('#logoutNav').show();
           //window.location.reload();
-
         }
-      });
-    }
-
-    const PUBLIC_CLIENT_ID = '687083663797-h6rk9pcjjm2ac1kib7kcbbjqpqc2ipcg.apps.googleusercontent.com'
-    // CONFIG documentation: https://developers.google.com/identity/one-tap/web/retrieve-credentials
-    const CONFIG = {
-      supportedAuthMethods: [
-        'https://accounts.google.com'
-      ],
-      supportedIdTokenProviders: [
-        {
-          uri: 'https://accounts.google.com',
-          clientId: PUBLIC_CLIENT_ID
-        }
-      ]
-    };
-    // onLoad callback, try to retrieve credential
-    window.onGoogleYoloLoad = (googleyolo) => {
-      console.log("GoogleYolo loaded.");
-
-      if (window.isSignedIn) {
-        console.log('is signed in, escape automatical login');
-        return;
-      }
-
-      const retrievePromise = googleyolo.retrieve(CONFIG);
-      // The googleyolo.retrieve() method returns a Promise that resolves when
-      // the request has completed. Attach a resolution function to the Promise
-      // to handle the credential if one was retrieved.
-      retrievePromise.then((credential) => {
-        if (credential.password) {
-          // An ID (usually email address) and password credential was retrieved.
-          // Sign in to your backend using the password.
-          // signInWithEmailAndPassword(credential.id, credential.password);
-          console.log('credential.id:', credential.id, 'credential.password:', credential.password);
-        } else {
-          // A Google Account is retrieved. Since Google supports ID token
-          // responses, you can use the token to sign in instead of initiating
-          // the Google sign-in flow.
-
-          // console.log('credential.idToken:', credential.idToken);
-          useGoogleIdTokenForAuth(credential.idToken);
-        }
-      }, (error) => {
-        // Credentials could not be retrieved. In general, if the user does not
-        // need to be signed in to use the page, you can just fail silently; or,
-        // you can also examine the error object to handle specific error cases.
-        console.log('Silent Fail:', error);
-        // If retrieval failed because there were no credentials available, and
-        // signing in might be useful or is required to proceed from this page,
-        // you can call `hint()` to prompt the user to select an account to sign
-        // in or sign up with.
-        /*
-        if (error.type === 'noCredentialsAvailable') {
-          googleyolo.hint(...).then(...);
-        }
-        */
       });
     };
 
@@ -113,28 +66,17 @@
         $('#loginNav').show();
         $('#logoutNav').hide();
       }
-      $('#loginNav').click(() => {
-        googleyolo.hint(CONFIG).then((credential) => {
-          if (credential.password) {
-            console.log('credential.id:', credential.id, 'credential.password:', credential.password);
-          } else {
-            // console.log('credential.idToken:', credential.idToken);
-            useGoogleIdTokenForAuth(credential.idToken);
-          }
-        }, (error) => {
-          console.log("Silent Fail:", error);
-        });
-      });
+
       $('#logoutNav').click(() => {
-        googleyolo.disableAutoSignIn().then(() => {
-          // Auto sign-in disabled.
-          console.log('Logout: Auto sign-in disabled.');
+        const auth2 = gapi.auth2.getAuthInstance();
+        auth2.signOut().then(function () {
+          console.log('User signed out.');
         });
         $.ajax({
           url : 'logout',
           type: 'POST',
           success: () => {
-            console.log('/logout POST success');
+            console.log('/logout ajax POST success');
             $('#loginNav').show();
             $('#logoutNav').hide();
             //window.location.reload();
@@ -175,7 +117,7 @@
             <div class="dropdown-menu" role="menu" aria-labelledby="dropdownToggle">
               <a class="dropdown-item" href="/profile">View My Profile</a>
               <div class="dropdown-divider"></div>
-              <a class="dropdown-item"><button class="btn btn-primary" id="loginNav">Login</button></a>
+              <a class="dropdown-item"><div class="g-signin2" id="loginNav" data-onsuccess="onSignIn"></div></a>
               <a class="dropdown-item"><button class="btn btn-danger" id="logoutNav">Logout</button></a>
             </div>
           </li>
