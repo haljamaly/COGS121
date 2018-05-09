@@ -48,7 +48,7 @@
       const id_token = googleUser.getAuthResponse().id_token;
       const google_id = profile.getId();
       $.ajax({
-        url : 'idTokenLogin',
+        url : '/idTokenLogin',
         type: 'POST',
         data: {
           idToken: id_token,
@@ -77,7 +77,7 @@
           console.log('User signed out.');
         });
         $.ajax({
-          url : 'logout',
+          url : '/logout',
           type: 'POST',
           success: () => {
             console.log('/logout ajax POST success');

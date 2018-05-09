@@ -1,5 +1,39 @@
 {% extends 'layout.html' %}
 {% block body %}
 <h1>Profile Page</h1>
-
+<hr/>
+<div id="container">
+  <div id="profile_img">
+    <img id="avatar" src="{{ avatar }}" alt="Avatar" style="border-radius: 50%; height: 20em;">
+  </div>
+  <div id="profile_content">
+    <h1 id="name">{{ uname }}</h1>
+    <div class="row">
+      <div class="col-6">
+        <h2>Visited:</h2>
+        <ul class="list-group" id="wishlist">
+          {% for location in visited %}
+            <li class="list-group-item">{{ location }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="col-6">
+        <h2>Wishlist:</h2>
+        <ul class="list-group" id="wishlist">
+          {% for location in wishlist %}
+            <li class="list-group-item">{{ location }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+    <h2>Posts:</h2>
+    <ul class="list-group" id="wishlist">
+      {% for post in posts %}
+        <a href="/post/{{ post.pid }}" class="list-group-item">
+          {{ post.title }} <span class="badge">{{ post.time }}</span>
+        </a>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
 {% endblock %}

@@ -21,16 +21,10 @@ $(document).ready(() => {
     });
   });
 
-    $('#resetBtn').click(() => {
-      document.getElementById("comment").reset();
-
-    });
-        // define a generic Ajax error handler:
-        // http://api.jquery.com/ajaxerror/
-        $(document).ajaxError(() => {
-          $('#status').html('Error: unknown ajaxError!');
-        });
-      });
+  $('#resetBtn').click(() => {
+    document.getElementById("comment").reset();
+  });
+});
 </script>
 
 <div id="primary_img">

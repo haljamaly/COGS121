@@ -85,21 +85,50 @@ app.get('/newpost', function(req, res) {
   const signedInUser = req.session.signedInUser;
   const isSignedIn = !!signedInUser;
   const avatar = isSignedIn ? signedInUser.img : '/img/meme.jpg';
-  res.render('newpost.html', { title: 'newposts', avatar: avatar, isSignedIn: isSignedIn || 0});
+  res.render('newpost.html', {title: 'newposts', avatar: avatar, isSignedIn: isSignedIn || 0});
 });
 
 app.get('/locations', function(req, res) {
   const signedInUser = req.session.signedInUser;
   const isSignedIn = !!signedInUser;
   const avatar = isSignedIn ? signedInUser.img : '/img/meme.jpg';
-  res.render('locations.html', { title: 'locations', avatar: avatar, isSignedIn: isSignedIn || 0});
+  res.render('locations.html', {title: 'locations', avatar: avatar, isSignedIn: isSignedIn || 0});
 });
 
 app.get('/profile', function(req, res) {
   const signedInUser = req.session.signedInUser;
   const isSignedIn = !!signedInUser;
-  const avatar = isSignedIn ? signedInUser.img : '/img/meme.jpg';
-  res.render('profile.html', { title: 'profile', avatar: avatar, isSignedIn: isSignedIn || 0});
+  if (isSignedIn) {
+    const uid = signedInUser.uid;
+    const avatar = signedInUser.img;
+    const uname = signedInUser.name;
+    const visited = [];
+    const wishlist = [];
+    let posts = [];
+    console.log('enter serialize');
+    db.serialize(function() {
+      db.each("SELECT location FROM visited WHERE uid = '" + uid + "'", function(err, row) {
+        visited.push(row.location);
+      });
+      db.each("SELECT location FROM wishlist WHERE uid = '" + uid + "'", function(err, row) {
+        wishlist.push(row.location);
+      });
+      db.each("SELECT * FROM posts WHERE author_uid = '" + uid + "'", function(err, row) {
+        posts.push(row);
+      }, function() {
+        // done fetching, parse time and render
+        posts = posts.map((obj) => {
+          const date = new Date(obj.time);
+          obj.time = date.toLocaleString();
+          return obj;
+        })
+        const data = {title: 'profile', avatar: avatar, uname: uname, visited: visited, wishlist: wishlist, posts: posts, isSignedIn: true};
+        res.render('profile.html', data);
+      });
+    });
+  } else {
+    res.redirect('/login');
+  }
 });
 
 
@@ -107,7 +136,7 @@ app.get('/about', function(req, res) {
   const signedInUser = req.session.signedInUser;
   const isSignedIn = !!signedInUser;
   const avatar = isSignedIn ? signedInUser.img : '/img/meme.jpg';
-  res.render('about.html', { title: 'about', avatar: avatar, isSignedIn: isSignedIn || 0});
+  res.render('about.html', {title: 'about', avatar: avatar, isSignedIn: isSignedIn || 0});
 });
 
 // for testing flash message
@@ -208,18 +237,25 @@ app.get('/users/:username', (req, res) => {
 });
 
 app.get('/post/:postid', (req, res) => {
-  let post = [];
+  const signedInUser = req.session.signedInUser;
+  const isSignedIn = !!signedInUser;
+  const avatar = isSignedIn ? signedInUser.img : '/img/meme.jpg';
+  const post = [];
   let val = '';
   db.serialize(function() {
     const postid = req.params.postid; // matches ':userid' above
     db.each("SELECT * FROM posts where pid = '" + postid + "'", function(err, row) {
       post.push(row);
     }, function() {
-      db.each("SELECT name FROM users where uid = '" + post[0].author + "'", function(err, row) {
+      db.each("SELECT name FROM users where uid = '" + post[0].author_uid + "'", function(err, row) {
         post[0].author = row.name;
       }, function() {
-        // All done fetching records, render response;
-        res.render("post.html", post[0]);
+        // All done fetching records, merge data and render response;
+        const data = Object.assign({title: 'newposts', avatar: avatar, isSignedIn: isSignedIn || 0}, post[0]);
+        // parse time
+        const date = new Date(data.time);
+        data.time = date.toLocaleString();
+        res.render("post.html", data);
         //  res.render("index.html", {posts: posts, title: 'home'});
       });
     });
