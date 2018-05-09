@@ -1,32 +1,48 @@
 {% extends 'layout.html' %}
 {% block body %}
-<head>
-  <link rel="stylesheet" href="../css/login.css">
-</head>
 <h1>Login Page</h1>
 
 
-<form action="action_page.php">
-  <div class="imgcontainer">
-    <img src="img_avatar2.png" alt="Avatar" class="avatar">
-  </div>
+<div class="flex-container text-center" style="display: flex; justify-content: center;">
+  <h1>You need to login to continue...</h1>
+</div>
 
-  <div class="container">
-    <label for="uname"><b>Username</b></label>
-    <input type="text" placeholder="Enter Username" name="uname" required>
+<script type="text/javascript">
+  function onSignIn_login_page(googleUser) {
+    if (window.isSignedIn) {
+      console.log('isSignedIn: escape onSignIn_login_page()');
+      console.log('redirect to root url');
+      window.location.replace('/');
+    }
+    // Useful data for your client-side scripts:
+    const profile = googleUser.getBasicProfile();
+    console.log("ID: " + profile.getId());
+    console.log('Full Name: ' + profile.getName());
+    console.log('Given Name: ' + profile.getGivenName());
+    console.log('Family Name: ' + profile.getFamilyName());
+    console.log("Image URL: " + profile.getImageUrl());
+    console.log("Email: " + profile.getEmail());
 
-    <label for="psw"><b>Password</b></label>
-    <input type="password" placeholder="Enter Password" name="psw" required>
+    // The ID token you need to pass to your backend:
+    const id_token = googleUser.getAuthResponse().id_token;
+    const google_id = profile.getId();
+    $.ajax({
+      url : '/idTokenLogin',
+      type: 'POST',
+      data: {
+        idToken: id_token,
+        google_id: google_id
+      },
+      success: (data) => {
+        console.log('Login ajax: success');
+        console.log(data);
+        window.location.replace('/');
+      }
+    });
+  };
+</script>
+<div>
+  <div class="g-signin2" data-onsuccess="onSignIn_login_page"></div>
+</div>
 
-    <a href="./" class="button--style-red">Login</a>
-    <label>
-      <input type="checkbox" checked="checked" name="remember"> Remember me
-    </label>
-  </div>
-
-  <div class="container" style="background-color:#f1f1f1">
-    <button type="button" class="cancelbtn">Cancel</button>
-    <span class="psw">Forgot <a href="#">password?</a></span>
-  </div>
-</form>
 {% endblock %}

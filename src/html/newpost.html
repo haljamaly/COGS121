@@ -51,25 +51,19 @@ $(document).ready(() => {
     console.log(time);
     $.ajax({
       // all URLs are relative to http://localhost:3000/
-      url: 'newpost',
+      url: '/newpost',
       type: 'POST', // <-- this is POST, not GET
       data: {
         name: $('#insertNameBox').val(),
         body: text,
         location: $('#insertLocationBox').val(),
         image: $('#insertImageURL').val(),
-        time: time,
-        author: "Hasan"
+        time: time
       },
       success: (data) => {
         $('#status').html(data.message);
       }
     });
-  });
-  // define a generic Ajax error handler:
-  // http://api.jquery.com/ajaxerror/
-  $(document).ajaxError(() => {
-    $('#status').html('Error: unknown ajaxError!');
   });
 });
 </script>

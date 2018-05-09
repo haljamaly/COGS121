@@ -84,8 +84,12 @@ app.get('/', function(req, res) {
 app.get('/newpost', function(req, res) {
   const signedInUser = req.session.signedInUser;
   const isSignedIn = !!signedInUser;
-  const avatar = isSignedIn ? signedInUser.img : '/img/meme.jpg';
-  res.render('newpost.html', {title: 'newposts', avatar: avatar, isSignedIn: isSignedIn || 0});
+  if (isSignedIn) {
+    const avatar = signedInUser.img;
+    res.render('newpost.html', {title: 'newposts', avatar: avatar, isSignedIn: isSignedIn || 0});
+  } else {
+    res.redirect('/login');
+  }
 });
 
 app.get('/locations', function(req, res) {
@@ -139,14 +143,6 @@ app.get('/about', function(req, res) {
   res.render('about.html', {title: 'about', avatar: avatar, isSignedIn: isSignedIn || 0});
 });
 
-// for testing flash message
-app.get('/flash', function(req, res){
-  // Set a flash message by passing the key, followed by the value, to res.flash().
-  // for types, please refer https://getbootstrap.com/docs/4.0/components/alerts/
-  res.flash('danger', 'Flash danger is back!');
-  res.flash('info', 'Flash info is back!');
-  res.redirect('/');
-});
 
 app.get('/locations/:location', (req, res) => {
   let posts = [];
@@ -162,6 +158,21 @@ app.get('/locations/:location', (req, res) => {
     });
   });
 });
+
+
+app.get('/login', (req, res) => {
+  res.render('login.html', {title: 'login', avatar: '/img/meme.jpg', isSignedIn:0});
+});
+
+// for testing flash message
+app.get('/flash', function(req, res){
+  // Set a flash message by passing the key, followed by the value, to res.flash().
+  // for types, please refer https://getbootstrap.com/docs/4.0/components/alerts/
+  res.flash('danger', 'Flash danger is back!');
+  res.flash('info', 'Flash info is back!');
+  res.redirect('/');
+});
+
 
 /*
  * handle Google sign-in
@@ -263,10 +274,15 @@ app.get('/post/:postid', (req, res) => {
 });
 
 app.post('/newpost', (req, res) => {
+  const signedInUser = req.session.signedInUser;
+  const isSignedIn = !!signedInUser;
   console.log(req.body);
-
+  let author_uid = 0;
+  if (isSignedIn) {
+    author_uid = signedInUser.uid;
+  }
   db.run(
-    'INSERT INTO posts VALUES (NULL, $title, $img, $time, $author, $location, $content)',
+    'INSERT INTO posts VALUES (NULL, $title, $img, $time, $author_uid, $location, $content)',
     // parameters to SQL query:
     {
       $title: req.body.name,
@@ -274,7 +290,7 @@ app.post('/newpost', (req, res) => {
       $img: req.body.image,
       $content: req.body.body,
       $time: req.body.time,
-      $author: req.body.author
+      $author_uid: author_uid
     },
     // callback function to run when the query finishes:
     (err) => {
