@@ -260,19 +260,12 @@ app.post('/signup', (req, res) => {
     },
     // callback function to run when the query finishes:
     (err) => {
-      // TODO: this.lastID is not available in db.run() callback, bug?
-      // https://github.com/mapbox/node-sqlite3/wiki/API#databaseclosecallback
-      console.log('insert callback');
-      console.log(this);
       if (err) {
         console.log(err);
         res.send({message: 'error in app.post(/signup)'});
       } else {
         // successfully signup user, now update session variable
-        const lastID = this.lastID;
-        console.log(this);
-        console.log('lastID: ' + lastID);
-        db.get("SELECT * FROM users WHERE uid = '" + lastID + "'", (err, row) => {
+        db.get("SELECT * FROM users WHERE google_id = '" + google_id + "'", (err, row) => {
           if (err) {
             console.log(err);
           } else if (row) {
