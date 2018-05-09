@@ -147,7 +147,6 @@ app.get('/profile', (req, res) => {
     const visited = [];
     const wishlist = [];
     let posts = [];
-    console.log('enter serialize');
     db.serialize(function() {
       db.each("SELECT location FROM visited WHERE uid = '" + uid + "'", function(err, row) {
         visited.push(row.location);
@@ -269,7 +268,6 @@ app.post('/signup', (req, res) => {
           if (err) {
             console.log(err);
           } else if (row) {
-            console.log('after insertion: ' + row);
             req.session.signedInUser = Object.assign(req.session.signedInUser, row);
             res.send({message: 'successfully run app.post(/signup)'});
           } else {
@@ -290,7 +288,7 @@ app.post('/idTokenLogin', (req, res) => {
   const google_id = req.body.google_id;
   // verify the token
   verify(idToken).catch(console.error).then((e) => {
-    console.log('verify callback');
+    console.log('verify callback, google_id: ' + google_id);
     req.session.signedInUser = {google_id: google_id};
     db.get("SELECT * FROM users where google_id = '" + google_id + "'",
       // callback when query finished
