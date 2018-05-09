@@ -5,43 +5,42 @@
 
 <div class="flex-container text-center" style="display: flex; justify-content: center;">
   <h1>You need to login to continue...</h1>
-</div>
 
-<script type="text/javascript">
-  function onSignIn_login_page(googleUser) {
-    if (window.isSignedIn) {
-      console.log('isSignedIn: escape onSignIn_login_page()');
-      console.log('redirect to root url');
-      window.location.replace('/');
-    }
-    // Useful data for your client-side scripts:
-    const profile = googleUser.getBasicProfile();
-    console.log("ID: " + profile.getId());
-    console.log('Full Name: ' + profile.getName());
-    console.log('Given Name: ' + profile.getGivenName());
-    console.log('Family Name: ' + profile.getFamilyName());
-    console.log("Image URL: " + profile.getImageUrl());
-    console.log("Email: " + profile.getEmail());
-
-    // The ID token you need to pass to your backend:
-    const id_token = googleUser.getAuthResponse().id_token;
-    const google_id = profile.getId();
-    $.ajax({
-      url : '/idTokenLogin',
-      type: 'POST',
-      data: {
-        idToken: id_token,
-        google_id: google_id
-      },
-      success: (data) => {
-        console.log('Login ajax: success');
-        console.log(data);
+  <script type="text/javascript">
+    function onSignIn_login_page(googleUser) {
+      if (window.isSignedIn) {
+        console.log('isSignedIn: escape onSignIn_login_page()');
+        console.log('redirect to root url');
         window.location.replace('/');
       }
-    });
-  };
-</script>
-<div>
+      // Useful data for your client-side scripts:
+      const profile = googleUser.getBasicProfile();
+      console.log("ID: " + profile.getId());
+      console.log('Full Name: ' + profile.getName());
+      console.log('Given Name: ' + profile.getGivenName());
+      console.log('Family Name: ' + profile.getFamilyName());
+      console.log("Image URL: " + profile.getImageUrl());
+      console.log("Email: " + profile.getEmail());
+
+      // The ID token you need to pass to your backend:
+      const id_token = googleUser.getAuthResponse().id_token;
+      const google_id = profile.getId();
+      $.ajax({
+        url : '/idTokenLogin',
+        type: 'POST',
+        data: {
+          idToken: id_token,
+          google_id: google_id
+        },
+        success: (data) => {
+          console.log('Login ajax: success');
+          console.log(data);
+          window.location.replace('/');
+        }
+      });
+    };
+  </script>
+
   <div class="g-signin2" data-onsuccess="onSignIn_login_page"></div>
 </div>
 

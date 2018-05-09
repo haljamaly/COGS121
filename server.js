@@ -63,9 +63,9 @@ nunjucks.configure('src/html', {
 });
 
 /*
- * handle routes
+ * Homepage, doesn't require login
  */
-app.get('/', function(req, res) {
+app.get('/', (req, res) => {
   const posts = [];
   db.serialize(function() {
     db.each("SELECT * FROM posts", function(err, row) {
@@ -75,34 +75,72 @@ app.get('/', function(req, res) {
       // console.log(posts);
       const signedInUser = req.session.signedInUser;
       const isSignedIn = !!signedInUser;
-      const avatar = isSignedIn ? signedInUser.img : '/img/meme.jpg';
-      res.render("index.html", {posts: posts, title: 'home', avatar: avatar, isSignedIn: isSignedIn || 0});
+      let avatar = '';
+      if (isSignedIn) {
+        if (!signedInUser.img) {
+          res.redirect('/signup');
+          return;
+        }
+        avatar = signedInUser.img;
+      } else {
+        avatar = '/img/meme.jpg';
+      }
+      const data = {posts: posts, title: 'Here-n-There', avatar: avatar, isSignedIn: isSignedIn || 0};
+      res.render("index.html", data);
     });
   });
 });
 
-app.get('/newpost', function(req, res) {
+/*
+ * Making new posts, require login
+ */
+app.get('/newpost', (req, res) => {
   const signedInUser = req.session.signedInUser;
   const isSignedIn = !!signedInUser;
   if (isSignedIn) {
+    if (!signedInUser.img) {
+      res.redirect('/signup');
+      return;
+    }
     const avatar = signedInUser.img;
-    res.render('newpost.html', {title: 'newposts', avatar: avatar, isSignedIn: isSignedIn || 0});
+    data = {title: 'newposts', avatar: avatar, isSignedIn: isSignedIn || 0};
+    res.render('newpost.html', data);
   } else {
     res.redirect('/login');
   }
 });
 
-app.get('/locations', function(req, res) {
+/*
+ * Browse locations, doesn't require login
+ */
+app.get('/locations', (req, res) => {
   const signedInUser = req.session.signedInUser;
   const isSignedIn = !!signedInUser;
-  const avatar = isSignedIn ? signedInUser.img : '/img/meme.jpg';
-  res.render('locations.html', {title: 'locations', avatar: avatar, isSignedIn: isSignedIn || 0});
+  let avatar = '';
+  if (isSignedIn) {
+    if (!signedInUser.img) {
+      res.redirect('/signup');
+      return;
+    }
+    avatar = signedInUser.img;
+  } else {
+    avatar = '/img/meme.jpg';
+  }
+  const data = {title: 'Locations', avatar: avatar, isSignedIn: isSignedIn || 0};
+  res.render("locations.html", data);
 });
 
-app.get('/profile', function(req, res) {
+/*
+ * View user's profile, require login
+ */
+app.get('/profile', (req, res) => {
   const signedInUser = req.session.signedInUser;
   const isSignedIn = !!signedInUser;
   if (isSignedIn) {
+    if (!signedInUser.img) {
+      res.redirect('/signup');
+      return;
+    }
     const uid = signedInUser.uid;
     const avatar = signedInUser.img;
     const uname = signedInUser.name;
@@ -126,7 +164,7 @@ app.get('/profile', function(req, res) {
           obj.time = date.toLocaleString();
           return obj;
         })
-        const data = {title: 'profile', avatar: avatar, uname: uname, visited: visited, wishlist: wishlist, posts: posts, isSignedIn: true};
+        const data = {title: 'Profile', avatar: avatar, uname: uname, visited: visited, wishlist: wishlist, posts: posts, isSignedIn: true};
         res.render('profile.html', data);
       });
     });
@@ -135,44 +173,120 @@ app.get('/profile', function(req, res) {
   }
 });
 
-
-app.get('/about', function(req, res) {
+/*
+ * About page, doesn't require login
+ */
+app.get('/about', (req, res) => {
   const signedInUser = req.session.signedInUser;
   const isSignedIn = !!signedInUser;
-  const avatar = isSignedIn ? signedInUser.img : '/img/meme.jpg';
-  res.render('about.html', {title: 'about', avatar: avatar, isSignedIn: isSignedIn || 0});
+  let avatar = '';
+  if (isSignedIn) {
+    if (!signedInUser.img) {
+      res.redirect('/signup');
+      return;
+    }
+    avatar = signedInUser.img;
+  } else {
+    avatar = '/img/meme.jpg';
+  }
+  const data = {title: 'About', avatar: avatar, isSignedIn: isSignedIn || 0};
+  res.render("about.html", data);
 });
 
 
 app.get('/locations/:location', (req, res) => {
-  let posts = [];
+  const posts = [];
   const locationToLookup = req.params.location.toLowerCase().split('_').join(' '); // matches ':location' above
-  let val = '';
   db.serialize(function() {
     db.each("SELECT * FROM posts where location = '" + locationToLookup + "' COLLATE NOCASE", function(err, row) {
       posts.push(row);
     }, function() {
-      // All done fetching records, render response;
+      // All done fetching records, send response;
       res.send(posts);
       //  res.render("index.html", {posts: posts, title: 'home'});
     });
   });
 });
 
-
+/*
+ * Login prompt for un-signed-in users
+ * If somehow the user accessed to this page, front end will check and redirect
+ * to Homepage.
+ */
 app.get('/login', (req, res) => {
   res.render('login.html', {title: 'login', avatar: '/img/meme.jpg', isSignedIn:0});
 });
 
-// for testing flash message
-app.get('/flash', function(req, res){
-  // Set a flash message by passing the key, followed by the value, to res.flash().
-  // for types, please refer https://getbootstrap.com/docs/4.0/components/alerts/
-  res.flash('danger', 'Flash danger is back!');
-  res.flash('info', 'Flash info is back!');
-  res.redirect('/');
+/*
+ * For user who signed in with google account but has no user info in our
+ * database.
+ */
+app.get('/signup', (req, res) => {
+  const signedInUser = req.session.signedInUser;
+  const isSignedIn = !!signedInUser;
+  if (!isSignedIn) {
+    res.redirect('/login');
+    return;
+  }
+  const google_id = signedInUser.google_id;
+  // check in database, if user has already signed up, go to Homepage
+  // but this should not happen, unless user intentionally goes to this route
+  // after they login
+  db.get("SELECT * FROM users WHERE google_id = '" + google_id + "'",
+    // callback when query finished
+    (err, row) => {
+      if (err) {
+        console.log('login err: ' + err);
+        res.send(err);
+      } else if (row) {
+        res.redirect('/');
+      } else {
+        res.render('signup.html', {title: 'Signup', avatar: '/img/meme.jpg', isSignedIn: true, google_id: google_id});
+      }
+    }
+  );
 });
 
+
+app.post('/signup', (req, res) => {
+  const google_id = req.session.signedInUser.google_id;
+  db.run(
+    'INSERT INTO users VALUES (NULL, $name, $img, $google_id)',
+    // parameters to SQL query:
+    {
+      $name: req.body.name,
+      $img: req.body.img,
+      $google_id: google_id
+    },
+    // callback function to run when the query finishes:
+    (err) => {
+      // TODO: this.lastID is not available in db.run() callback, bug?
+      // https://github.com/mapbox/node-sqlite3/wiki/API#databaseclosecallback
+      console.log('insert callback');
+      console.log(this);
+      if (err) {
+        console.log(err);
+        res.send({message: 'error in app.post(/signup)'});
+      } else {
+        // successfully signup user, now update session variable
+        const lastID = this.lastID;
+        console.log(this);
+        console.log('lastID: ' + lastID);
+        db.get("SELECT * FROM users WHERE uid = '" + lastID + "'", (err, row) => {
+          if (err) {
+            console.log(err);
+          } else if (row) {
+            console.log('after insertion: ' + row);
+            req.session.signedInUser = Object.assign(req.session.signedInUser, row);
+            res.send({message: 'successfully run app.post(/signup)'});
+          } else {
+            console.log('Error, somehow signup insertion to database failed.');
+            res.send({message: 'Error, somehow signup insertion to database failed.'});
+          }
+        });
+      }
+    });
+});
 
 /*
  * handle Google sign-in
@@ -185,16 +299,17 @@ app.post('/idTokenLogin', (req, res) => {
   verify(idToken).catch(console.error).then((e) => {
     console.log('verify callback');
     req.session.signedInUser = {google_id: google_id};
-    db.each("SELECT * FROM users where google_id = '" + google_id + "'",
+    db.get("SELECT * FROM users where google_id = '" + google_id + "'",
       // callback when query finished
       (err, row) => {
         if (err) {
-          console.log('login err: no match found in user database');
-          res.send({google_id: google_id});
-        } else {
+          console.log('login err: ' + err);
+        } else if (row) {
           // console.log('login acquired:', row);
           req.session.signedInUser = Object.assign(req.session.signedInUser, row);
           res.send(req.session.signedInUser);
+        } else {
+          res.redirect('/signup');
         }
       }
     );
@@ -205,7 +320,7 @@ app.post('/idTokenLogin', (req, res) => {
 /*
  * handle logout
  */
-app.post('/logout', function(req, res) {
+app.post('/logout', (req, res) => {
   console.log('/logout with POST method');
   req.session.destroy((err) => {
     if (err) {
@@ -234,7 +349,6 @@ app.get('/users', (req, res) => {
 app.get('/users/:username', (req, res) => {
   let posts = [];
   const nameToLookup = req.params.username.toLowerCase().split('_').join(' '); // matches ':userid' above
-  let val = '';
   db.serialize(function() {
     const nameToLookup = req.params.username.toLowerCase().split('_').join(' '); // matches ':userid' above
       db.each("SELECT * FROM users where name = '" + nameToLookup + "' COLLATE NOCASE", function(err, row) {
@@ -252,7 +366,6 @@ app.get('/post/:postid', (req, res) => {
   const isSignedIn = !!signedInUser;
   const avatar = isSignedIn ? signedInUser.img : '/img/meme.jpg';
   const post = [];
-  let val = '';
   db.serialize(function() {
     const postid = req.params.postid; // matches ':userid' above
     db.each("SELECT * FROM posts where pid = '" + postid + "'", function(err, row) {
@@ -303,6 +416,17 @@ app.post('/newpost', (req, res) => {
     }
   );
 });
+
+
+// for testing flash message
+app.get('/flash', function(req, res){
+  // Set a flash message by passing the key, followed by the value, to res.flash().
+  // for types, please refer https://getbootstrap.com/docs/4.0/components/alerts/
+  res.flash('danger', 'Flash danger is back!');
+  res.flash('info', 'Flash info is back!');
+  res.redirect('/');
+});
+
 
 // start the server at URL: http://localhost:3000/
 app.listen(3000, () => {

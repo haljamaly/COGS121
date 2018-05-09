@@ -1,0 +1,68 @@
+{% extends 'layout.html' %}
+{% block body %}
+
+<script type="text/javascript">
+
+
+$(document).ready(() => {
+  $('#submitBtn').click(() => {
+    console.log('submitBtn clicked');
+    $.ajax({
+      url: '/signup',
+      type: 'POST',
+      data: {
+        name: $('#nameInput').val(),
+        img: $('#imgInput').val()
+      },
+      success: (data) => {
+        console.log(data.message);
+        window.location.replace('/');
+      }
+    });
+  });
+
+  $('#logoutBtn').click(() => {
+    const auth2 = gapi.auth2.getAuthInstance();
+    auth2.signOut().then(function () {
+      console.log('User signed out.');
+    });
+    $.ajax({
+      url : '/logout',
+      type: 'POST',
+      success: () => {
+        console.log('/logout ajax POST success');
+        window.location.replace('/');
+      }
+    });
+  });
+});
+</script>
+
+<h1>Signup Page</h1>
+
+<div class="flex-container text-center" style="display: flex; justify-content: center;">
+  <h4>You have signed in with your google account, please fill in the fields below to register at Here-n-There.</h4>
+</div>
+<div class="row" id="survey">
+  <br>
+  <div class="box col-8 col-offset-2" style="padding: 3em">
+    <div class="form-group">
+      <label><h4>User name:</h4></label>
+      <input type="text" id="nameInput">
+    </div>
+    <div class="form-group">
+      <label><h4>Profile image (URL):</h4></label>
+      <input type="text" id="imgInput">
+    </div>
+    <div style="display: flex; align-items: center; justify-content: center;">
+      <button class="btn btn-primary" id="submitBtn">
+        <span style="font-size:20">Register</span>
+      </button>
+      <button class="btn btn-danger" id="logoutBtn">
+        <span style="font-size:20">Logout</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
