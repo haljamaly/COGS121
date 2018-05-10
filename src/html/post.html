@@ -11,7 +11,6 @@ $(document).ready(() => {
     $.ajax({
       // all URLs are relative to http://localhost:3000/
       url: requestURL,
-      type: 'POST', // <-- this is POST, not GET
       data: {
         name: $('#comment_text').val(),
       },
