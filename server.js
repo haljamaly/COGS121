@@ -357,6 +357,7 @@ app.get('/post/:postid', (req, res) => {
   const isSignedIn = !!signedInUser;
   const avatar = isSignedIn ? signedInUser.img : '/img/meme.jpg';
   const post = [];
+  const comments = [];
   db.serialize(function() {
     const postid = req.params.postid; // matches ':userid' above
     db.each("SELECT * FROM posts where pid = '" + postid + "'", function(err, row) {
@@ -365,17 +366,55 @@ app.get('/post/:postid', (req, res) => {
       db.each("SELECT name FROM users where uid = '" + post[0].author_uid + "'", function(err, row) {
         post[0].author = row.name;
       }, function() {
+        db.each("SELECT * FROM comments where post = '" + postid + "'", function(err,row) {
+          comments.push(row);
+        }, function () {
         // All done fetching records, merge data and render response;
-        const data = Object.assign({title: 'newposts', avatar: avatar, isSignedIn: isSignedIn || 0}, post[0]);
+        const data = Object.assign({title: 'newposts', avatar: avatar, isSignedIn: isSignedIn || 0, comments: comments}, post[0]);
         // parse time
         const date = new Date(data.time);
         data.time = date.toLocaleString();
+        console.log(data);
         res.render("post.html", data);
         //  res.render("index.html", {posts: posts, title: 'home'});
       });
     });
   });
 });
+});
+
+app.post('/post/:postid', (req, res) => {
+  const signedInUser = req.session.signedInUser;
+  const isSignedIn = !!signedInUser;
+  const pid = req.params.postid;
+  console.log(pid);
+  console.log(req.body);
+  let author_uid = 0;
+  if (isSignedIn) {
+    author_uid = signedInUser.uid;
+  }
+  console.log(author_uid);
+  db.run(
+    'INSERT INTO comments VALUES (NULL, $author_UID,$author, $post, $content)',
+    // parameters to SQL query:
+    {
+      $author_UID: author_uid,
+      $author: signedInUser.name,
+      $content: req.body.body,
+      $post: pid,
+    },
+    // callback function to run when the query finishes:
+    (err) => {
+      if (err) {
+        console.log(err);
+        res.send({message: 'error in app.post(/newpost)'});
+      } else {
+        res.send({message: 'successfully run app.post(/newpost)'});
+      }
+    }
+  );
+});
+
 
 app.post('/newpost', (req, res) => {
   const signedInUser = req.session.signedInUser;

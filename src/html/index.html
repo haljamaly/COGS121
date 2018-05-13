@@ -38,7 +38,7 @@
   .allpics {
     max-width: 100%;
     height: 200px;
-    margin: 0 3px;
+    margin: 5px 5px 5px 5px;
   }
   a.button {
     -webkit-appearance: button;
@@ -63,13 +63,14 @@
   .zoom:hover {
     transform: scale(1.1); /* (150% zoom - Note: if the zoom is too large, it will go outside of the viewport) */
   }
+
 </style>
 
 <script type="text/javascript">
 
 $(document).ready(() => {
   $('#filterButton').click(() => {
-    const requestURL = '../locations/' + $('#locationBox').val().toLowerCase().split(' ').join('_');
+    const requestURL = '../locations/' + $('#autocomplete').val().toLowerCase().split(' ').join('_');
     console.log(requestURL);
     console.log('making ajax request to:', requestURL);
 
@@ -117,7 +118,7 @@ $(document).ready(() => {
   //$('.dropdown-toggle').dropdown();
 });
 </script>
-
+<body>
 <div class="row">
   <div class="col-10">
     <h1>Welcome to Here-n-There!</h1>
@@ -144,10 +145,10 @@ $(document).ready(() => {
 <hr/>
 
 <div class="row">
-  <div class="col-12 gallery text-center">
+  <div class="col-12 gallery text-center" id="locationField">
     <h1>Gallery</h1>
-    <input id="locationBox" type="text" size="20"/>
-    <button id="filterButton">Look up Location!</button>
+    <input id="autocomplete" type="text"
+        placeholder="Enter a location">    <button id="filterButton">Look up Location!</button>
   </div>
 </div>
 <div class="row">
@@ -163,4 +164,38 @@ $(document).ready(() => {
 </div>
 <div class="col-1"></div>
 <div id="status"></div>
+
+<script>
+var placeSearch, autocomplete, geocoder;
+
+function initAutocomplete() {
+  console.log("HELLO!");
+  geocoder = new google.maps.Geocoder();
+  autocomplete = new google.maps.places.Autocomplete(
+      (document.getElementById('autocomplete'))/*,
+      {types: ['(cities)']}*/);
+
+  autocomplete.addListener('place_changed', fillInAddress);
+}
+
+function codeAddress(address) {
+    geocoder.geocode( { 'address': address}, function(results, status) {
+      if (status == 'OK') {
+        console.log("REsult:" + results[0].geometry.location);
+      } else {
+        console.log('Geocode was not successful for the following reason: ' + status);
+      }
+    });
+  }
+
+function fillInAddress() {
+  var place = autocomplete.getPlace();
+  console.log(place.place_id);
+  //   codeAddress(document.getElementById('autocomplete').value);
+}
+    </script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDXeYN_tTJ0na7vyK94PMAxBhgKrV7Ac-U&libraries=places&callback=initAutocomplete"
+        async defer></script>
+      </body>
+
 {% endblock %}

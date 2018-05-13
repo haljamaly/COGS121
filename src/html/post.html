@@ -5,7 +5,8 @@
 
 $(document).ready(() => {
   $('#submitBtn').click(() => {
-    const requestURL = 'post/' + {{pid}};
+    location.reload();
+    const requestURL = {{pid}};
     console.log('making ajax request to:', requestURL);
     // TODO: This URL right now is root/post/post/PID, which is not right.
     $.ajax({
@@ -13,7 +14,7 @@ $(document).ready(() => {
       url: requestURL,
       type: 'POST', // <-- this is POST, not GET
       data: {
-        name: $('#comment_text').val(),
+        body: $('#comment_text').val(),
       },
       success: (data) => {
         $('#status').html(data.message);
@@ -47,7 +48,15 @@ $(document).ready(() => {
   {{ content | safe }}
 </div>
 <hr/>
-<h1><strong>Comment</strong></h1>
+<h1> <strong> Comments </strong> </h1>
+{% for comment in comments %}
+<div class="row comment">
+  <div class="col-xs-3"><h2> {{ comment.author }} </h2> </div>
+  <div class="col-xs-2"></div>
+  <div class="col-xs-7"> {{comment.body }} </div>
+</div>
+{% endfor %}
+<h2><strong>Add a comment!</strong></h2>
 <div id="comment">
   <textarea id="comment_text" rows="4" style="width: 100%">
   </textarea>

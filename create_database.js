@@ -24,6 +24,7 @@ db.serialize(() => {
   db.run("CREATE TABLE visited (uid INTEGER NOT NULL, location TEXT NOT NULL)");
   db.run("CREATE TABLE posts (pid INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT NOT NULL, img TEXT NOT NULL, time TEXT, author_uid INTEGER NOT NULL, location TEXT NOT NULL COLLATE NOCASE, content TEXT NOT NULL)");
   db.run("CREATE TABLE locations (title TEXT PRIMARY KEY, score INTEGER NOT NULL)");
+  db.run("CREATE TABLE comments (cid INTEGER PRIMARY KEY AUTOINCREMENT, author_id INTEGER NOT NULL, author TEXT NOT NULL, post INTEGER NOT NULL, body TEXT NOT NULL)");
 
   // insert 3 rows of data:
   db.run("INSERT INTO users VALUES (1, 'Hasan', '/img/hasan.jpg', '12345')");

@@ -33,8 +33,10 @@
       background-color: #f44336;
       color: white;
   }
-</style>
 
+
+</style>
+<div id="map"></div>
 <h1>New PostPage</h1>
 
 <script src="http://js.nicedit.com/nicEdit-latest.js" type="text/javascript"></script>
@@ -56,7 +58,7 @@ $(document).ready(() => {
       data: {
         name: $('#insertNameBox').val(),
         body: text,
-        location: $('#insertLocationBox').val(),
+        location: $('#autocomplete').val(),
         image: $('#insertImageURL').val(),
         time: time
       },
@@ -75,7 +77,8 @@ $(document).ready(() => {
   </div>
   <div class="row">
     <div class="col-2"> <span> Location: </span></div>
-    <div class="col-2"><input id="insertLocationBox" type="text" size="20"/></div>
+    <div class="col-2" id="locationField"><input id="autocomplete" type="text"
+        placeholder="Enter a location" size="20"></div>
   </div>
   <div class="row">
     <div class="col-2"> <span> Image URL: </span></div>
@@ -100,5 +103,36 @@ $(document).ready(() => {
 
 
   <div id="status"></div>
+  <script>
+  var placeSearch, autocomplete, geocoder;
+
+  function initAutocomplete() {
+    console.log("HELLO!");
+    geocoder = new google.maps.Geocoder();
+    autocomplete = new google.maps.places.Autocomplete(
+        (document.getElementById('autocomplete'))/*,
+        {types: ['(cities)']}*/);
+
+    autocomplete.addListener('place_changed', fillInAddress);
+  }
+
+  function codeAddress(address) {
+      geocoder.geocode( { 'address': address}, function(results, status) {
+        if (status == 'OK') {
+          console.log(results[0].geometry.location);
+        } else {
+          console.log('Geocode was not successful for the following reason: ' + status);
+        }
+      });
+    }
+
+  function fillInAddress() {
+    var place = autocomplete.getPlace();
+    console.log(place.place_id);
+    //   codeAddress(document.getElementById('autocomplete').value);
+  }
+      </script>
+      <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDXeYN_tTJ0na7vyK94PMAxBhgKrV7Ac-U&libraries=places&callback=initAutocomplete"
+          async defer></script>
 
 {% endblock %}
