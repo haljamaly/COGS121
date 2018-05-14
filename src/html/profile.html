@@ -1,39 +1,96 @@
 {% extends 'layout.html' %}
 {% block body %}
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+<!-- jQuery library -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+<!-- Latest compiled JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<style>
+  #id {
+    text-align: center;
+  }
+  .left-content {
+    border-right: 1px dashed #333;
+
+  }
+  .flex-container{
+    display: flex;
+    flex-flow: wrap;
+    margin: 0 -5px;
+  }
+  .flex-container>* {
+    flex: 0 0 33.3333%;
+  }
+  .allpics {
+    max-width: 100%;
+    height: 200px;
+    margin: 5px 5px 5px 5px;
+  }
+  a.button {
+    -webkit-appearance: button;
+    -moz-appearance: button;
+    appearance: button;
+    text-decoration: none;
+    color: initial;
+    position:absolute;
+    top:50px; right:100px;
+    font: bold 11px Arial;
+    background-color: #EEEEEE;
+    color: #333333;
+    padding: 2px 6px 2px 6px;
+    border-top: 1px solid #CCCCCC;
+    border-right: 1px solid #333333;
+    border-bottom: 1px solid #333333;
+    border-left: 1px solid #CCCCCC;
+  }
+  .zoom {
+    transition: transform .2s; /* Animation */
+  }
+  .zoom:hover {
+    transform: scale(1.1); /* (150% zoom - Note: if the zoom is too large, it will go outside of the viewport) */
+  }
+
+</style>
 <h1>Profile Page</h1>
 <hr/>
 <div id="container">
-  <div id="profile_img">
+  <div class ="row text-center" id="profile_img">
     <img id="avatar" src="{{ avatar }}" alt="Avatar" style="border-radius: 50%; height: 20em;">
+    <h1 id="name" class="text-center">{{ uname }}</h1>
+
   </div>
   <div id="profile_content">
-    <h1 id="name">{{ uname }}</h1>
     <div class="row">
-      <div class="col-6">
-        <h2>Visited:</h2>
-        <ul class="list-group" id="wishlist">
-          {% for location in visited %}
-            <li class="list-group-item">{{ location }}</li>
-          {% endfor %}
-        </ul>
+      <div class="col-xs-6 text-center left-content">
+        <h2> Posts </h2>
+        <div class="gallery">
+          <br>
+          <br>
+          <div id="pics" class="flex-container text-center">
+            {% for post in posts %}
+              <div class="zoom"><a class="alllinks" href="/post/{{post.pid}}"><img class="allpics" src="{{post.img}}"/></a></div>
+            {% endfor %}
+          </div>
+        </div>
       </div>
-      <div class="col-6">
-        <h2>Wishlist:</h2>
-        <ul class="list-group" id="wishlist">
-          {% for location in wishlist %}
-            <li class="list-group-item">{{ location }}</li>
-          {% endfor %}
-        </ul>
+      <div class="col-xs-6 text-center">
+        <h2> Pinned </h2>
+        <div class=" gallery">
+          <br>
+          <br>
+          <div id="pics" class="flex-container text-center">
+            {% for pin in pinned %}
+              <div class="zoom"><a class="alllinks" href="/post/{{pin.pid}}"><img class="allpics" src="{{pin.img}}"/></a></div>
+            {% endfor %}
+          </div>
+        </div>
       </div>
     </div>
-    <h2>Posts:</h2>
-    <ul class="list-group" id="wishlist">
-      {% for post in posts %}
-        <a href="/post/{{ post.pid }}" class="list-group-item">
-          {{ post.title }} <span class="badge">{{ post.time }}</span>
-        </a>
-      {% endfor %}
-    </ul>
+
   </div>
+</div>
 </div>
 {% endblock %}

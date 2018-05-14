@@ -144,27 +144,36 @@ app.get('/profile', (req, res) => {
     const uid = signedInUser.uid;
     const avatar = signedInUser.img;
     const uname = signedInUser.name;
-    const visited = [];
-    const wishlist = [];
+    const pinned = [];
     let posts = [];
+    const pinnedposts = [];
     db.serialize(function() {
-      db.each("SELECT location FROM visited WHERE uid = '" + uid + "'", function(err, row) {
-        visited.push(row.location);
-      });
-      db.each("SELECT location FROM wishlist WHERE uid = '" + uid + "'", function(err, row) {
-        wishlist.push(row.location);
-      });
-      db.each("SELECT * FROM posts WHERE author_uid = '" + uid + "'", function(err, row) {
-        posts.push(row);
+      db.each("SELECT * FROM pins WHERE uid = '" + uid + "'", function(err, row) {
+        pinned.push(row);
       }, function() {
-        // done fetching, parse time and render
-        posts = posts.map((obj) => {
-          const date = new Date(obj.time);
-          obj.time = date.toLocaleString();
-          return obj;
-        })
-        const data = {title: 'Profile', avatar: avatar, uname: uname, visited: visited, wishlist: wishlist, posts: posts, isSignedIn: true};
-        res.render('profile.html', data);
+        let whatever = [];
+        for (x in pinned) {
+          whatever.push(pinned[x].pid);
+        }
+          let whatever2 = whatever.toString();
+          let argument = "(" + whatever2 + ")";
+          db.each("SELECT * FROM posts WHERE pid in " + argument , function(err, row) {
+            pinnedposts.push(row);
+          }, function() {
+            db.each("SELECT * FROM posts WHERE author_uid = '" + uid + "'", function(err, row) {
+              posts.push(row);
+            }, function() {
+              // done fetching, parse time and render
+              posts = posts.map((obj) => {
+                const date = new Date(obj.time);
+                obj.time = date.toLocaleString();
+                return obj;
+              })
+              const data = {title: 'Profile', avatar: avatar, uname: uname, posts: posts, pinned: pinnedposts, isSignedIn: true};
+              console.log(data);
+              res.render('profile.html', data);
+            });
+          });
       });
     });
   } else {
@@ -354,6 +363,7 @@ app.get('/users/:username', (req, res) => {
 
 app.get('/post/:postid', (req, res) => {
   const signedInUser = req.session.signedInUser;
+  const uid = (signedInUser) ? signedInUser.uid : -1;
   const isSignedIn = !!signedInUser;
   const avatar = isSignedIn ? signedInUser.img : '/img/meme.jpg';
   const post = [];
@@ -370,7 +380,8 @@ app.get('/post/:postid', (req, res) => {
           comments.push(row);
         }, function () {
         // All done fetching records, merge data and render response;
-        const data = Object.assign({title: 'newposts', avatar: avatar, isSignedIn: isSignedIn || 0, comments: comments}, post[0]);
+        const deleting = (uid == post[0].author_uid) ? 1 : 0;
+        const data = Object.assign({title: 'newposts', avatar: avatar, isSignedIn: isSignedIn || 0, comments: comments, me: deleting}, post[0]);
         // parse time
         const date = new Date(data.time);
         data.time = date.toLocaleString();
@@ -383,12 +394,115 @@ app.get('/post/:postid', (req, res) => {
 });
 });
 
-app.post('/post/:postid', (req, res) => {
+
+
+app.post('/post/:postid/pin', (req, res) => {
   const signedInUser = req.session.signedInUser;
   const isSignedIn = !!signedInUser;
   const pid = req.params.postid;
   console.log(pid);
   console.log(req.body);
+  let author_uid = 0;
+  if (isSignedIn) {
+    author_uid = signedInUser.uid;
+  }
+  console.log(author_uid);
+  db.run(
+    'INSERT INTO pins VALUES ($author_UID,$post)',
+    // parameters to SQL query:
+    {
+      $author_UID: author_uid,
+      $post: pid,
+    },
+    // callback function to run when the query finishes:
+    (err) => {
+      if (err) {
+        console.log(err);
+        res.send({message: 'error in app.post(/:postid/pin)'});
+      } else {
+        res.send({message: 'successfully run app.post(/newpost)'});
+      }
+    }
+  );
+});
+
+app.post('/post/:postid/unpin', (req, res) => {
+  const signedInUser = req.session.signedInUser;
+  const isSignedIn = !!signedInUser;
+  const pid = req.params.postid;
+  console.log(pid);
+  console.log(req.body);
+  let author_uid = 0;
+  if (isSignedIn) {
+    author_uid = signedInUser.uid;
+  }
+  console.log(author_uid);
+  db.run(
+    'DELETE FROM pins where uid=$author_UID and pid=$post',
+    // parameters to SQL query:
+    {
+      $author_UID: author_uid,
+      $post: pid,
+    },
+    // callback function to run when the query finishes:
+    (err) => {
+      if (err) {
+        console.log(err);
+        res.send({message: 'error in app.post(/:postid/pin)'});
+      } else {
+        res.send({message: 'successfully run app.post(/newpost)'});
+      }
+    }
+  );
+});
+
+app.post('/post/:postid/delete', (req, res) => {
+  const signedInUser = req.session.signedInUser;
+  const isSignedIn = !!signedInUser;
+  const pid = req.params.postid;
+  console.log(pid);
+  console.log(req.body);
+  let author_uid = 0;
+  if (isSignedIn) {
+    author_uid = signedInUser.uid;
+  }
+  console.log(author_uid);
+  db.run(
+    'DELETE FROM posts where pid=$post',
+    // parameters to SQL query:
+    {
+      $post: pid,
+    },
+    // callback function to run when the query finishes:
+    function() {
+      db.run(
+        'DELETE FROM pins where pid=$post',
+        // parameters to SQL query:
+        {
+          $post: pid,
+        },
+        // callback function to run when the query finishes:
+        (err) => {
+          if (err) {
+            console.log(err);
+            res.send({message: 'error in app.post(/:postid/pin)'});
+          } else {
+            res.send({message: 'successfully run app.post(/newpost)'});
+          }
+        }
+      );
+    }
+  );
+});
+
+
+
+app.post('/post/:postid', (req, res) => {
+  const signedInUser = req.session.signedInUser;
+  const isSignedIn = !!signedInUser;
+  const pid = req.params.postid;
+  console.log(pid);
+  console.log("body is : " + req.body);
   let author_uid = 0;
   if (isSignedIn) {
     author_uid = signedInUser.uid;

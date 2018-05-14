@@ -1,9 +1,108 @@
 {% extends 'layout.html' %}
 {% block body %}
+<style>
+  #pin{
+    width: 50px;
+    height:50px;
+    float: right;
+  }
 
+  #pin:hover {
+     border:2px solid red;
+     box-shadow: 0 0 10px #333;
+     -webkit-box-shadow: 0 0 10px #333;
+     -moz-box-shadow: 0 0 10px #333;
+     -o-box-shadow: 0 0 10px #333;
+     -ms-box-shadow: 0 0 10px #333;
+     cursor: pointer;
+  }
+  #unpin{
+    width: 50px;
+    height:50px;
+    float: right;
+  }
+
+  #unpin:hover {
+     border:2px solid red;
+     box-shadow: 0 0 10px #333;
+     -webkit-box-shadow: 0 0 10px #333;
+     -moz-box-shadow: 0 0 10px #333;
+     -o-box-shadow: 0 0 10px #333;
+     -ms-box-shadow: 0 0 10px #333;
+     cursor: pointer;
+  }
+
+  #delete{
+    width: 50px;
+    height:50px;
+    float: right;
+  }
+
+  #delete:hover {
+     border:2px solid red;
+     box-shadow: 0 0 10px #333;
+     -webkit-box-shadow: 0 0 10px #333;
+     -moz-box-shadow: 0 0 10px #333;
+     -o-box-shadow: 0 0 10px #333;
+     -ms-box-shadow: 0 0 10px #333;
+     cursor: pointer;
+   }
+</style>
 <script type="text/javascript">
 
 $(document).ready(() => {
+  $('#pin').click(() => {
+    console.log("YAS!");
+    const requestURL = {{pid}} + "/pin";
+    console.log(requestURL);
+    $.ajax({
+      url: requestURL,
+      type: 'POST',
+      data: {
+        pid: {{pid}}
+      },
+      success: (data) => {
+        console.log(data);
+        $('#status').html(data.message);
+      }
+    });
+  });
+
+  $('#unpin').click(() => {
+    console.log("YAS!");
+    const requestURL = {{pid}} + "/unpin";
+    console.log(requestURL);
+    $.ajax({
+      url: requestURL,
+      type: 'POST',
+      data: {
+        pid: {{pid}}
+      },
+      success: (data) => {
+        console.log(data);
+        $('#status').html(data.message);
+      }
+    });
+  });
+
+  $('#delete').click(() => {
+    console.log("YAS!");
+    const requestURL = {{pid}} + "/delete";
+    console.log(requestURL);
+    $.ajax({
+      url: requestURL,
+      type: 'POST',
+      data: {
+        pid: {{pid}}
+      },
+      success: (data) => {
+        console.log(data);
+        $('#status').html(data.message);
+      }
+    });
+  });
+
+
   $('#submitBtn').click(() => {
     location.reload();
     const requestURL = {{pid}};
@@ -48,7 +147,14 @@ $(document).ready(() => {
   {{ content | safe }}
 </div>
 <hr/>
-<h1> <strong> Comments </strong> </h1>
+<div class="row">
+<div class="col-xs-8"><h1> <strong> Comments </strong> </h1></div>
+<div class="col-xs-2"> <img id="pin" src="http://icons.iconarchive.com/icons/icons8/ios7/512/Messaging-Pin-icon.png"></img></div>
+<div class="col-xs-2"> <img id="unpin" src="https://cdn.iconscout.com/public/images/icon/premium/png-512/unpin-3d9199aedef16fca-512x512.png"></img></div>
+{% if me %}
+<div class="col-xs-2"> <a href='/'><img id="delete" src="https://cdn0.iconfinder.com/data/icons/social-messaging-ui-color-shapes/128/close-circle-red-512.png"></img></a></div>
+{% endif %}
+</div>
 {% for comment in comments %}
 <div class="row comment">
   <div class="col-xs-3"><h2> {{ comment.author }} </h2> </div>
