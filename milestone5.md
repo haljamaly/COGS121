@@ -1,6 +1,14 @@
 **Milestone 5** 
 
-* Screenshots: 
+* **Screenshots:** 
+![Screenshot](ms5/milestone5.1.png)
+![Screenshot](ms5/milestone5.2.png)
+![Screenshot](ms5/milestone5.3.png)
+![Screenshot](ms5/milestone5.4.png)
+![Screenshot](ms5/milestone5.5.png)
+![Screenshot](ms5/milestone5.6.png)
+![Screenshot](ms5/milestone5.7.png)
+
 
 * **Explanation of changes to UI:** 
 1. Editted the navigation bar to a minimalist selection of options. 
