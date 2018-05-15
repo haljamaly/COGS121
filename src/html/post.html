@@ -1,6 +1,17 @@
 {% extends 'layout.html' %}
 {% block body %}
 <style>
+
+  .flex-container {
+    display: flex;
+    justify-content: center;
+  }
+
+  #primary_img {
+    width: 90%;
+    height: 90%;
+  }
+
   #pin{
     width: 50px;
     height:50px;
@@ -51,8 +62,19 @@
 <script type="text/javascript">
 
 $(document).ready(() => {
+  if ({{ pinned }}) {
+    $('#pin').hide();
+    $('#unpin').show();
+  } else {
+    $('#unpin').hide();
+    $('#pin').show();
+  }
+
   $('#pin').click(() => {
-    console.log("YAS!");
+    if (!window.isSignedIn) {
+      alert('You need to signin to pin this wonderful post.');
+      return;
+    }
     const requestURL = {{pid}} + "/pin";
     console.log(requestURL);
     $.ajax({
@@ -63,7 +85,7 @@ $(document).ready(() => {
       },
       success: (data) => {
         console.log(data);
-        $('#status').html(data.message);
+        window.location.reload();
       }
     });
   });
@@ -80,15 +102,14 @@ $(document).ready(() => {
       },
       success: (data) => {
         console.log(data);
-        $('#status').html(data.message);
+        window.location.reload();
       }
     });
   });
 
   $('#delete').click(() => {
-    console.log("YAS!");
     const requestURL = {{pid}} + "/delete";
-    console.log(requestURL);
+    console.log('making delete call to '+requestURL);
     $.ajax({
       url: requestURL,
       type: 'POST',
@@ -97,44 +118,41 @@ $(document).ready(() => {
       },
       success: (data) => {
         console.log(data);
-        $('#status').html(data.message);
+        window.location.replace('/');
       }
     });
   });
 
 
   $('#submitBtn').click(() => {
-    location.reload();
+    if (!window.isSignedIn) {
+      alert('You need to signin to post comment.');
+      return;
+    }
     const requestURL = {{pid}};
     console.log('making ajax request to:', requestURL);
-    // TODO: This URL right now is root/post/post/PID, which is not right.
     $.ajax({
-      // all URLs are relative to http://localhost:3000/
       url: requestURL,
-      type: 'POST', // <-- this is POST, not GET
+      type: 'POST',
       data: {
         body: $('#comment_text').val(),
       },
       success: (data) => {
-        $('#status').html(data.message);
+        window.location.reload();
       }
     });
-  });
-
-  $('#resetBtn').click(() => {
-    document.getElementById("comment").reset();
   });
 });
 </script>
 
-<div id="primary_img">
-  <img src="{{ img }}" width="100%"/>
+<div class="flex-container">
+  <img  id="primary_img" src="{{ img }}"/>
 </div>
 <div id="post_title">
   <h1><strong>{{ title }}</strong></h1>
 </div>
 <div id="author">
-  <h4>Author: {{ author }}</h4>
+  <h4>Author: {{ author_name }}</h4>
 </div>
 <div id="location">
   <h4>Location: {{ location }}</h4>
@@ -146,20 +164,23 @@ $(document).ready(() => {
 <div id="content" style="min-height: 200px">
   {{ content | safe }}
 </div>
+
 <hr/>
 <div class="row">
-<div class="col-xs-8"><h1> <strong> Comments </strong> </h1></div>
-<div class="col-xs-2"> <img id="pin" src="http://icons.iconarchive.com/icons/icons8/ios7/512/Messaging-Pin-icon.png"></img></div>
-<div class="col-xs-2"> <img id="unpin" src="https://cdn.iconscout.com/public/images/icon/premium/png-512/unpin-3d9199aedef16fca-512x512.png"></img></div>
-{% if me %}
-<div class="col-xs-2"> <a href='/'><img id="delete" src="https://cdn0.iconfinder.com/data/icons/social-messaging-ui-color-shapes/128/close-circle-red-512.png"></img></a></div>
-{% endif %}
+  <div class="col-10"><h1> <strong> Comments </strong> </h1></div>
+  <div class="col-1">
+    <img id="pin" src="http://icons.iconarchive.com/icons/icons8/ios7/512/Messaging-Pin-icon.png">
+    <img id="unpin" src="https://cdn.iconscout.com/public/images/icon/premium/png-512/unpin-3d9199aedef16fca-512x512.png">
+  </div>
+  {% if me %}
+  <div class="col-1"><img id="delete" src="https://cdn0.iconfinder.com/data/icons/social-messaging-ui-color-shapes/128/close-circle-red-512.png"></img></div>
+  {% endif %}
 </div>
 {% for comment in comments %}
 <div class="row comment">
-  <div class="col-xs-3"><h2> {{ comment.author }} </h2> </div>
-  <div class="col-xs-2"></div>
-  <div class="col-xs-7"> {{comment.body }} </div>
+  <div class="col-3"><h2> {{ comment.author_name }} </h2> </div>
+  <div class="col-2"></div>
+  <div class="col-7"> {{comment.body }} </div>
 </div>
 {% endfor %}
 <h2><strong>Add a comment!</strong></h2>

@@ -67,10 +67,10 @@ nunjucks.configure('src/html', {
  */
 app.get('/', (req, res) => {
   const posts = [];
-  db.serialize(function() {
-    db.each("SELECT * FROM posts", function(err, row) {
+  db.serialize(() => {
+    db.each("SELECT * FROM posts", (err, row) => {
       posts.push(row);
-    }, function() {
+    }, () => {
       // All done fetching records, render response
       // console.log(posts);
       const signedInUser = req.session.signedInUser;
@@ -147,22 +147,22 @@ app.get('/profile', (req, res) => {
     const pinned = [];
     let posts = [];
     const pinnedposts = [];
-    db.serialize(function() {
-      db.each("SELECT * FROM pins WHERE uid = '" + uid + "'", function(err, row) {
+    db.serialize(() => {
+      db.each("SELECT * FROM pins WHERE uid = '" + uid + "'", (err, row) => {
         pinned.push(row);
-      }, function() {
+      }, () => {
         let whatever = [];
         for (x in pinned) {
           whatever.push(pinned[x].pid);
         }
           let whatever2 = whatever.toString();
           let argument = "(" + whatever2 + ")";
-          db.each("SELECT * FROM posts WHERE pid in " + argument , function(err, row) {
+          db.each("SELECT * FROM posts WHERE pid in " + argument , (err, row) => {
             pinnedposts.push(row);
-          }, function() {
-            db.each("SELECT * FROM posts WHERE author_uid = '" + uid + "'", function(err, row) {
+          }, () => {
+            db.each("SELECT * FROM posts WHERE author_uid = '" + uid + "'", (err, row) => {
               posts.push(row);
-            }, function() {
+            }, () => {
               // done fetching, parse time and render
               posts = posts.map((obj) => {
                 const date = new Date(obj.time);
@@ -205,10 +205,10 @@ app.get('/about', (req, res) => {
 app.get('/locations/:location', (req, res) => {
   const posts = [];
   const locationToLookup = req.params.location.toLowerCase().split('_').join(' '); // matches ':location' above
-  db.serialize(function() {
-    db.each("SELECT * FROM posts where location = '" + locationToLookup + "' COLLATE NOCASE", function(err, row) {
+  db.serialize(() => {
+    db.each("SELECT * FROM posts WHERE location = '" + locationToLookup + "' COLLATE NOCASE", (err, row) => {
       posts.push(row);
-    }, function() {
+    }, () => {
       // All done fetching records, send response;
       res.send(posts);
       //  res.render("index.html", {posts: posts, title: 'home'});
@@ -299,7 +299,7 @@ app.post('/idTokenLogin', (req, res) => {
   verify(idToken).catch(console.error).then((e) => {
     console.log('verify callback, google_id: ' + google_id);
     req.session.signedInUser = {google_id: google_id};
-    db.get("SELECT * FROM users where google_id = '" + google_id + "'",
+    db.get("SELECT * FROM users WHERE google_id = '" + google_id + "'",
       // callback when query finished
       (err, row) => {
         if (err) {
@@ -335,10 +335,10 @@ app.post('/logout', (req, res) => {
  */
 app.get('/users', (req, res) => {
   let names = [];
-  db.serialize(function() {
-      db.each("SELECT name FROM users", function(err, row) {
+  db.serialize(() => {
+      db.each("SELECT name FROM users", (err, row) => {
           names.push(row);
-      }, function() {
+      }, () => {
           // All done fetching records, render response;
           res.send(names);
         //  res.render("index.html", {posts: posts, title: 'home'});
@@ -349,11 +349,11 @@ app.get('/users', (req, res) => {
 app.get('/users/:username', (req, res) => {
   let posts = [];
   const nameToLookup = req.params.username.toLowerCase().split('_').join(' '); // matches ':userid' above
-  db.serialize(function() {
+  db.serialize(() => {
     const nameToLookup = req.params.username.toLowerCase().split('_').join(' '); // matches ':userid' above
-      db.each("SELECT * FROM users where name = '" + nameToLookup + "' COLLATE NOCASE", function(err, row) {
+      db.each("SELECT * FROM users WHERE name = '" + nameToLookup + "' COLLATE NOCASE", (err, row) => {
           posts.push(row);
-      }, function() {
+      }, () => {
           // All done fetching records, render response;
           res.send(posts);
         //  res.render("index.html", {posts: posts, title: 'home'});
@@ -361,58 +361,64 @@ app.get('/users/:username', (req, res) => {
     });
 });
 
+
 app.get('/post/:postid', (req, res) => {
   const signedInUser = req.session.signedInUser;
-  const uid = (signedInUser) ? signedInUser.uid : -1;
   const isSignedIn = !!signedInUser;
+  const signedInUid = (isSignedIn) ? signedInUser.uid : -1;
   const avatar = isSignedIn ? signedInUser.img : '/img/meme.jpg';
-  const post = [];
+  let post = {};
+  let pinned = 0;
   const comments = [];
-  db.serialize(function() {
-    const postid = req.params.postid; // matches ':userid' above
-    db.each("SELECT * FROM posts where pid = '" + postid + "'", function(err, row) {
-      post.push(row);
-    }, function() {
-      db.each("SELECT name FROM users where uid = '" + post[0].author_uid + "'", function(err, row) {
-        post[0].author = row.name;
-      }, function() {
-        db.each("SELECT * FROM comments where post = '" + postid + "'", function(err,row) {
+  const postid = req.params.postid; // matches ':postid' above
+  // fetch post
+  db.get("SELECT * FROM posts WHERE pid = '" + postid + "'", (err, row) => {
+    post = row;
+
+    // fetch pin info
+    db.get("SELECT * FROM pins WHERE uid = $uid AND pid = $pid",
+      // parameters to SQL query:
+      {
+        $uid: signedInUid,
+        $pid: postid
+      }, (err, row) => {
+        if (row) {
+          pinned = 1;
+        }
+        // fetch comments
+        db.each("SELECT * FROM comments WHERE post = '" + postid + "'", (err, row) => {
           comments.push(row);
-        }, function () {
-        // All done fetching records, merge data and render response;
-        const deleting = (uid == post[0].author_uid) ? 1 : 0;
-        const data = Object.assign({title: 'newposts', avatar: avatar, isSignedIn: isSignedIn || 0, comments: comments, me: deleting}, post[0]);
-        // parse time
-        const date = new Date(data.time);
-        data.time = date.toLocaleString();
-        console.log(data);
-        res.render("post.html", data);
-        //  res.render("index.html", {posts: posts, title: 'home'});
-      });
+        }, () => {
+          // All done fetching records, merge data and render response;
+          const deleting = (signedInUid == post.author_uid) ? 1 : 0;
+          const data = Object.assign({avatar: avatar, isSignedIn: isSignedIn || 0, comments: comments, me: deleting, pinned: pinned}, post);
+          // parse time
+          const date = new Date(data.time);
+          data.time = date.toLocaleString();
+          console.log('\npost/'+postid+' data:');
+          console.log(data);
+          res.render("post.html", data);
+        });
     });
   });
 });
-});
-
 
 
 app.post('/post/:postid/pin', (req, res) => {
   const signedInUser = req.session.signedInUser;
   const isSignedIn = !!signedInUser;
-  const pid = req.params.postid;
-  console.log(pid);
-  console.log(req.body);
-  let author_uid = 0;
-  if (isSignedIn) {
-    author_uid = signedInUser.uid;
+  if (!isSignedIn) {
+    res.send({message: 'not signedin'});
+    return;
   }
-  console.log(author_uid);
+  const pid = req.params.postid;
+  console.log('\nPOST/post/'+pid+'/pin');
   db.run(
-    'INSERT INTO pins VALUES ($author_UID,$post)',
+    'INSERT INTO pins VALUES ($uid, $pid)',
     // parameters to SQL query:
     {
-      $author_UID: author_uid,
-      $post: pid,
+      $uid: signedInUser.uid,
+      $pid: pid
     },
     // callback function to run when the query finishes:
     (err) => {
@@ -420,7 +426,7 @@ app.post('/post/:postid/pin', (req, res) => {
         console.log(err);
         res.send({message: 'error in app.post(/:postid/pin)'});
       } else {
-        res.send({message: 'successfully run app.post(/newpost)'});
+        res.send({message: 'successfully run app.post(/:postid/pin)'});
       }
     }
   );
@@ -429,28 +435,26 @@ app.post('/post/:postid/pin', (req, res) => {
 app.post('/post/:postid/unpin', (req, res) => {
   const signedInUser = req.session.signedInUser;
   const isSignedIn = !!signedInUser;
-  const pid = req.params.postid;
-  console.log(pid);
-  console.log(req.body);
-  let author_uid = 0;
-  if (isSignedIn) {
-    author_uid = signedInUser.uid;
+  if (!isSignedIn) {
+    res.send({message: 'not signedin'});
+    return;
   }
-  console.log(author_uid);
+  const pid = req.params.postid;
+  console.log('\nPOST/post/'+pid+'/unpin');
   db.run(
-    'DELETE FROM pins where uid=$author_UID and pid=$post',
+    'DELETE FROM pins WHERE uid=$author_uid AND pid=$post',
     // parameters to SQL query:
     {
-      $author_UID: author_uid,
+      $author_uid: signedInUser.uid,
       $post: pid,
     },
     // callback function to run when the query finishes:
     (err) => {
       if (err) {
         console.log(err);
-        res.send({message: 'error in app.post(/:postid/pin)'});
+        res.send({message: 'error in app.post(/:postid/unpin)'});
       } else {
-        res.send({message: 'successfully run app.post(/newpost)'});
+        res.send({message: 'successfully run app.post(/:postid/unpin)'});
       }
     }
   );
@@ -459,24 +463,23 @@ app.post('/post/:postid/unpin', (req, res) => {
 app.post('/post/:postid/delete', (req, res) => {
   const signedInUser = req.session.signedInUser;
   const isSignedIn = !!signedInUser;
+  if (!isSignedIn) {
+    res.send({message: 'not signedin'});
+    return;
+  }
   const pid = req.params.postid;
   console.log(pid);
   console.log(req.body);
-  let author_uid = 0;
-  if (isSignedIn) {
-    author_uid = signedInUser.uid;
-  }
-  console.log(author_uid);
   db.run(
-    'DELETE FROM posts where pid=$post',
+    'DELETE FROM posts WHERE pid=$post',
     // parameters to SQL query:
     {
       $post: pid,
     },
     // callback function to run when the query finishes:
-    function() {
+    () => {
       db.run(
-        'DELETE FROM pins where pid=$post',
+        'DELETE FROM pins WHERE pid=$post',
         // parameters to SQL query:
         {
           $post: pid,
@@ -485,9 +488,9 @@ app.post('/post/:postid/delete', (req, res) => {
         (err) => {
           if (err) {
             console.log(err);
-            res.send({message: 'error in app.post(/:postid/pin)'});
+            res.send({message: 'error in app.post(/post/:postid/delete)'});
           } else {
-            res.send({message: 'successfully run app.post(/newpost)'});
+            res.send({message: 'successfully run app.post(/post/:postid/delete)'});
           }
         }
       );
@@ -500,30 +503,28 @@ app.post('/post/:postid/delete', (req, res) => {
 app.post('/post/:postid', (req, res) => {
   const signedInUser = req.session.signedInUser;
   const isSignedIn = !!signedInUser;
-  const pid = req.params.postid;
-  console.log(pid);
-  console.log("body is : " + req.body);
-  let author_uid = 0;
-  if (isSignedIn) {
-    author_uid = signedInUser.uid;
+  if (!isSignedIn) {
+    res.send({message: 'not signedin'});
+    return;
   }
-  console.log(author_uid);
+  console.log("body is : " + req.body);
+
   db.run(
     'INSERT INTO comments VALUES (NULL, $author_UID,$author, $post, $content)',
     // parameters to SQL query:
     {
-      $author_UID: author_uid,
+      $author_UID: signedInUser.uid,
       $author: signedInUser.name,
       $content: req.body.body,
-      $post: pid,
+      $post: req.params.postid,
     },
     // callback function to run when the query finishes:
     (err) => {
       if (err) {
         console.log(err);
-        res.send({message: 'error in app.post(/newpost)'});
+        res.send({message: 'error in comment app.post(/post/:postid)'});
       } else {
-        res.send({message: 'successfully run app.post(/newpost)'});
+        res.send({message: 'successfully run comment app.post(/post/:postid)'});
       }
     }
   );
@@ -533,21 +534,24 @@ app.post('/post/:postid', (req, res) => {
 app.post('/newpost', (req, res) => {
   const signedInUser = req.session.signedInUser;
   const isSignedIn = !!signedInUser;
-  console.log(req.body);
-  let author_uid = 0;
-  if (isSignedIn) {
-    author_uid = signedInUser.uid;
+  if (!isSignedIn) {
+    res.send({message: 'not signedin'});
+    return;
   }
+  // guarantee user is signedin
+  console.log(req.body);
+
   db.run(
-    'INSERT INTO posts VALUES (NULL, $title, $img, $time, $author_uid, $location, $content)',
+    'INSERT INTO posts VALUES (NULL, $title, $img, $time, $author_uid, $author_name, $location, $content)',
     // parameters to SQL query:
     {
       $title: req.body.name,
-      $location: req.body.location,
       $img: req.body.image,
-      $content: req.body.body,
       $time: req.body.time,
-      $author_uid: author_uid
+      $author_uid: signedInUser.uid,
+      $author_name: signedInUser.name,
+      $location: req.body.location,
+      $content: req.body.body
     },
     // callback function to run when the query finishes:
     (err) => {
@@ -563,7 +567,7 @@ app.post('/newpost', (req, res) => {
 
 
 // for testing flash message
-app.get('/flash', function(req, res){
+app.get('/flash', (req, res) => {
   // Set a flash message by passing the key, followed by the value, to res.flash().
   // for types, please refer https://getbootstrap.com/docs/4.0/components/alerts/
   res.flash('danger', 'Flash danger is back!');

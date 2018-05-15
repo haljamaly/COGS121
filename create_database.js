@@ -22,9 +22,9 @@ db.serialize(() => {
   db.run("CREATE TABLE users (uid INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, img TEXT, google_id TEXT UNIQUE)");
   db.run("CREATE TABLE wishlist (uid INTEGER NOT NULL, location TEXT NOT NULL)");
   db.run("CREATE TABLE visited (uid INTEGER NOT NULL, location TEXT NOT NULL)");
-  db.run("CREATE TABLE posts (pid INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT NOT NULL, img TEXT NOT NULL, time TEXT, author_uid INTEGER NOT NULL, location TEXT NOT NULL COLLATE NOCASE, content TEXT NOT NULL)");
+  db.run("CREATE TABLE posts (pid INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT NOT NULL, img TEXT NOT NULL, time TEXT, author_uid INTEGER NOT NULL, author_name TEXT NOT NULL, location TEXT NOT NULL COLLATE NOCASE, content TEXT NOT NULL)");
   db.run("CREATE TABLE locations (title TEXT PRIMARY KEY, score INTEGER NOT NULL)");
-  db.run("CREATE TABLE comments (cid INTEGER PRIMARY KEY AUTOINCREMENT, author_id INTEGER NOT NULL, author TEXT NOT NULL, post INTEGER NOT NULL, body TEXT NOT NULL)");
+  db.run("CREATE TABLE comments (cid INTEGER PRIMARY KEY AUTOINCREMENT, author_uid INTEGER NOT NULL, author_name TEXT NOT NULL, post INTEGER NOT NULL, body TEXT NOT NULL)");
   db.run("CREATE TABLE pins (uid INTEGER NOT NULL, pid INTEGER NOT NULL, unique(uid,pid))");
 
   // insert 3 rows of data:
@@ -41,8 +41,8 @@ db.serialize(() => {
   db.run("INSERT INTO visited VALUES (3, 'Mount Fuji')");
   db.run("INSERT INTO visited VALUES (2, 'Mount Fuji')");
 
-  db.run("INSERT INTO posts VALUES (1,'Mount Fuji is good!', 'https://news.cruise1st.co.uk/wp-content/uploads/2018/03/header-mount-fuji.jpg', '2018-04-22T10:25:43.511', 1, 'Mount Fuji', '<p>Yo, Mount Fuji is awesome.</p>')");
-  db.run("INSERT INTO posts VALUES (2,'Los Angeles is lit!', 'https://amp.businessinsider.com/images/5aa2d4bb06b2b72a008b45c3-750-563.jpg','2018-04-22T14:25:43.511Z',2, 'Los Angeles', '<p>Los Angeles is beautiful and alive.</p>')");
+  db.run("INSERT INTO posts VALUES (1,'Mount Fuji is good!', 'https://news.cruise1st.co.uk/wp-content/uploads/2018/03/header-mount-fuji.jpg', '2018-04-22T10:25:43.511', 1, 'Hasan', 'Mount Fuji', '<p>Yo, Mount Fuji is awesome.</p>')");
+  db.run("INSERT INTO posts VALUES (2,'Los Angeles is lit!', 'https://amp.businessinsider.com/images/5aa2d4bb06b2b72a008b45c3-750-563.jpg','2018-04-22T14:25:43.511Z',2, 'Shuyuan', 'Los Angeles', '<p>Los Angeles is beautiful and alive.</p>')");
 
   db.run("INSERT INTO locations VALUES ('Mount Fuji', 3)");
   db.run ("INSERT INTO locations VALUES ('Los Angeles', 2)");
@@ -50,8 +50,10 @@ db.serialize(() => {
   console.log('successfully created the tables');
 
   // print them out to confirm their contents:
-  //db.each("SELECT name, job, pet FROM users_to_pets", (err, row) => {
-  //    console.log(row.name + ": " + row.job + ' - ' + row.pet);
+  console.log('====================* users *====================');
+  db.each("SELECT * FROM users", (err, row) => {
+    console.log(row.uid + "\t" + row.name + '\tgoogle_id: ' + row.google_id + '\timg: ' + row.img);
   });
+});
 
 db.close();
