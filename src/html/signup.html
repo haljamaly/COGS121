@@ -1,5 +1,32 @@
 {% extends 'layout.html' %}
 {% block body %}
+<style>
+  h1 {
+    text-align: center
+  }
+  .form-style-1 {
+    margin:10px auto;
+    max-width: 800px;
+    padding: 20px 12px 10px 20px;
+    font: 13px "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+  }
+  .form-style-1 li {
+    padding: 0;
+    display: block;
+    list-style: none;
+    margin: 10px 0 0 0;
+    text-align: center
+
+  }
+  .form-style-1 label{
+    margin:0 0 3px 0;
+    padding:0px;
+    display:block;
+    font-weight: bold;
+    text-align: center
+
+  }
+</style>
 
 <script type="text/javascript">
 
@@ -43,15 +70,16 @@ $(document).ready(() => {
 <div class="flex-container text-center" style="display: flex; justify-content: center;">
   <h4>You have signed in with your google account, </br> please fill in the fields below to register at Here-n-There.</h4>
 </div>
-<div class="row" id="survey">
+<ul class="form-style-1">
+  <div id="survey">
   <br>
   <div class="box col-8 col-offset-2" style="padding: 3em">
     <div class="form-group">
-      <label><h4>User name:</h4></label>
+      <li><label>User name:</label></li>
       <input type="text" id="nameInput">
     </div>
     <div class="form-group">
-      <label><h4>Profile image (URL):</h4></label>
+      <li> <label>Profile image (URL):</label></li>
       <input type="text" id="imgInput">
     </div>
     <div style="display: flex; align-items: center; justify-content: center;">
@@ -64,5 +92,6 @@ $(document).ready(() => {
     </div>
   </div>
 </div>
+</ul>
 
 {% endblock %}
