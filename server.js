@@ -86,6 +86,7 @@ app.get('/', (req, res) => {
         avatar = '/img/meme.jpg';
       }
       const data = {posts: posts, title: 'Here-n-There', avatar: avatar, isSignedIn: isSignedIn || 0};
+      console.log(data);
       res.render("index.html", data);
     });
   });
