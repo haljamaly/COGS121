@@ -60,7 +60,9 @@ $(document).ready(() => {
         body: text,
         location: $('#autocomplete').val(),
         image: $('#insertImageURL').val(),
-        time: time
+        time: time,
+        lat: window.lat,
+        lng: window.lng
       },
       success: (data) => {
         $('#status').html(data.message);
@@ -129,6 +131,10 @@ $(document).ready(() => {
   function fillInAddress() {
     var place = autocomplete.getPlace();
     console.log(place.place_id);
+    console.log(place.geometry.location.lat());
+    console.log(place.geometry.location.lng());
+    window.lat = place.geometry.location.lat();
+    window.lng = place.geometry.location.lng();
     //   codeAddress(document.getElementById('autocomplete').value);
   }
       </script>
