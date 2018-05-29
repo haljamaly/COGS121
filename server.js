@@ -543,7 +543,7 @@ app.post('/newpost', (req, res) => {
   console.log(req.body);
 
   db.run(
-    'INSERT INTO posts VALUES (NULL, $title, $img, $time, $author_uid, $author_name, $location, $content)',
+    'INSERT INTO posts VALUES (NULL, $title, $img, $time, $author_uid, $author_name, $location, $lat, $lng, $content)',
     // parameters to SQL query:
     {
       $title: req.body.name,
@@ -552,6 +552,8 @@ app.post('/newpost', (req, res) => {
       $author_uid: signedInUser.uid,
       $author_name: signedInUser.name,
       $location: req.body.location,
+      $lat: req.body.lat,
+      $lng: req.body.lng,
       $content: req.body.body
     },
     // callback function to run when the query finishes:
