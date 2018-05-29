@@ -1,5 +1,7 @@
 {% extends 'layout.html' %}
 {% block body %}
+
+
 <style>
 p {
    display: block;
@@ -11,14 +13,34 @@ p {
 }
 p1 {
     font-weight: bold;
-    font-style: italix; 
+    font-style: italix;
 }
-</style
+</style>
 <h1>About Page</h1>
 <br>
 <br>
-<body>
-  <p> At Here-n-There hope to create an interactive travel blog platform. People can connect with other traverlers and explore user posts around the world. We are inspired by the personal informatics of blogs and travel.</p>
+<body style = "background: url(http://www.freevectors.net/files/large/EarthGlobeVector.jpg); no-repeat">
+  <p> At Here-n-There we hope to create an interactive travel blog platform that connects traverers!</p>
   <p1> Come travel with us! (and your worldwide friends). </p1>
 </body>
+<h2> Contact Us! </h2>
+<form method="post" name="contact_form"
+action="./contact-form-handler.php">
+    Your Name:
+    <input type="text" name="name">
+    Email Address:
+    <input type="text" name="email">
+    Message:
+    <textarea name="message"></textarea>
+    <input type="submit" value="Submit">
+</form>
+
+<script language="JavaScript">
+var frmvalidator  = new Validator("contactform");
+frmvalidator.addValidation("name","req","Please provide your name");
+frmvalidator.addValidation("email","req","Please provide your email");
+frmvalidator.addValidation("email","email",
+  "Please enter a valid email address");
+</script>
+
 {% endblock %}
