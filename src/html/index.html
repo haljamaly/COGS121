@@ -280,7 +280,14 @@ function fillInAddress() {
   var place = autocomplete.getPlace();
   console.log(place.geometry.location.lng());
   console.log(place.geometry.location.lat());
+  if (place.geometry) {
+    map.panTo(place.geometry.location);
+    map.setZoom(10);
+    search();
+  }
+  else {
 
+  }
   //   codeAddress(document.getElementById('autocomplete').value);
 }
     </script>
