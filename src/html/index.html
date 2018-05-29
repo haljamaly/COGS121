@@ -69,6 +69,11 @@
     transform: scale(1.1); /* (150% zoom - Note: if the zoom is too large, it will go outside of the viewport) */
   }
 
+  #map {
+    height:30rem;
+    width:"100%"
+  }
+
 </style>
 
 <script type="text/javascript">
@@ -135,7 +140,7 @@ $(document).ready(() => {
 <hr/>
 <div class="row">
   <div class="col-10">
-    <iframe src="https://www.google.com/maps/embed?pb=!1m10!1m8!1m3!1d49921682.98558856!2d-1.219544210558942!3d40.20955851951437!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2sus!4v1524440040796 &key=AIzaSyAgZAsmAyovxVeCtAyXFUJ42hQxphw9YEY" width="100%" height="400" frameborder="0" style="border:0" allowfullscreen></iframe>
+    <div id="map"></div>
   </div>
   <div class="col-2">
     <div class="row text-center">
@@ -171,9 +176,17 @@ $(document).ready(() => {
 <div id="status"></div>
 
 <script>
-var placeSearch, autocomplete, geocoder;
+var placeSearch, autocomplete, geocoder, map, heatmap;
+
 
 function initAutocomplete() {
+  console.log("Creating map");
+  map = new google.maps.Map(document.getElementById('map'), {
+    zoom: 13,
+    center: {lat: 37.775, lng: -122.434}
+    });
+    console.log(map);
+
   console.log("HELLO!");
   geocoder = new google.maps.Geocoder();
   autocomplete = new google.maps.places.Autocomplete(
@@ -186,7 +199,7 @@ function initAutocomplete() {
 function codeAddress(address) {
     geocoder.geocode( { 'address': address}, function(results, status) {
       if (status == 'OK') {
-        console.log("REsult:" + results[0].geometry.location);
+        console.log("Result:" + results[0].geometry.location);
       } else {
         console.log('Geocode was not successful for the following reason: ' + status);
       }
@@ -195,11 +208,13 @@ function codeAddress(address) {
 
 function fillInAddress() {
   var place = autocomplete.getPlace();
-  console.log(place.place_id);
+  console.log(place.geometry.location.lng());
+  console.log(place.geometry.location.lat());
+
   //   codeAddress(document.getElementById('autocomplete').value);
 }
     </script>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDXeYN_tTJ0na7vyK94PMAxBhgKrV7Ac-U&libraries=places&callback=initAutocomplete"
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDXeYN_tTJ0na7vyK94PMAxBhgKrV7Ac-U&libraries=places,visualization&callback=initAutocomplete "
         async defer></script>
       </body>
 
