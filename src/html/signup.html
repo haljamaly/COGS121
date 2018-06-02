@@ -1,5 +1,12 @@
+<!--
+This page contains the form that is required by new users to sign up for an account. It will take their Google ID, their inputted username and
+image URL and pass the data to the backend to be inserted into the database entry.
+-->
+
 {% extends 'layout.html' %}
 {% block body %}
+
+<!-- Styling for the elements in the file -->
 <style>
   h1 {
     text-align: center
@@ -16,7 +23,6 @@
     list-style: none;
     margin: 10px 0 0 0;
     text-align: center
-
   }
   .form-style-1 label{
     margin:0 0 3px 0;
@@ -24,7 +30,6 @@
     display:block;
     font-weight: bold;
     text-align: center
-
   }
 </style>
 
@@ -32,8 +37,8 @@
 
 
 $(document).ready(() => {
+  // Submitting the input fields of the sign up form
   $('#submitBtn').click(() => {
-    console.log('submitBtn clicked');
     $.ajax({
       url: '/signup',
       type: 'POST',
@@ -42,22 +47,20 @@ $(document).ready(() => {
         img: $('#imgInput').val()
       },
       success: (data) => {
-        console.log(data.message);
         window.location.replace('/');
       }
     });
   });
 
+  // Handling the log out
   $('#logoutBtn').click(() => {
     const auth2 = gapi.auth2.getAuthInstance();
     auth2.signOut().then(function () {
-      console.log('User signed out.');
     });
     $.ajax({
       url : '/logout',
       type: 'POST',
       success: () => {
-        console.log('/logout ajax POST success');
         window.location.replace('/');
       }
     });
@@ -73,6 +76,8 @@ $(document).ready(() => {
 <ul class="form-style-1">
   <div id="survey">
   <br>
+
+  <!-- Code for the form to be filled in to complete sign up -->
   <div class="box col-8 col-offset-2" style="padding: 3em">
     <div class="form-group">
       <li><label>User name:</label></li>

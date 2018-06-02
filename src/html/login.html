@@ -1,3 +1,8 @@
+<!--
+This file contains the button that forces the users to login for pages that require users to have signed up for the account. It contains of a POST request that sends back the id login
+token to check the database for an already created account.
+-->
+
 {% extends 'layout.html' %}
 {% block body %}
 <h1>Login Page</h1>
@@ -8,21 +13,15 @@
 
   <script type="text/javascript">
     function onSignIn_login_page(googleUser) {
+      // signed in redirecting to the homepage
       if (window.isSignedIn) {
-        console.log('isSignedIn: escape onSignIn_login_page()');
-        console.log('redirect to root url');
         window.location.replace('/');
       }
-      // Useful data for your client-side scripts:
+      // Getting data for the Google account
       const profile = googleUser.getBasicProfile();
-      console.log("ID: " + profile.getId());
-      console.log('Full Name: ' + profile.getName());
-      console.log('Given Name: ' + profile.getGivenName());
-      console.log('Family Name: ' + profile.getFamilyName());
-      console.log("Image URL: " + profile.getImageUrl());
-      console.log("Email: " + profile.getEmail());
 
-      // The ID token you need to pass to your backend:
+
+      // The ID token that is being passed to the backend
       const id_token = googleUser.getAuthResponse().id_token;
       const google_id = profile.getId();
       $.ajax({
@@ -33,14 +32,11 @@
           google_id: google_id
         },
         success: (data) => {
-          console.log('Login ajax: success');
-          console.log(data);
           window.location.replace('/');
         }
       });
     };
   </script>
-
   <div class="g-signin2" data-onsuccess="onSignIn_login_page"></div>
 </div>
 

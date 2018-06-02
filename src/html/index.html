@@ -1,5 +1,13 @@
+<!--
+THis file contains the code for the homepage of the application. The first section is the Google Maps API Heatmap that represents the density of the posts that have been made in the different Locations
+that are tagged by the users. It also contains a gallery that renders the images of the posts that have been created by the users, which contain links that go to the individual post page. The page
+also contains a Google Places API powered auto-complete search bar that filters the posts based on location.
+-->
+
 {% extends 'layout.html' %}
 {% block body %}
+
+<!-- Styling of the html in the page  -->
 <style>
   .button {
       background-color: #4CAF50; /* Green */
@@ -85,8 +93,8 @@
          font-family: 'Roboto','sans-serif';
          line-height: 30px;
          padding-left: 10px;
-       }
-       #floating-panel {
+  }
+  #floating-panel {
          background-color: #fff;
          border: 1px solid #999;
          left: 25%;
@@ -94,32 +102,28 @@
          position: absolute;
          top: 10px;
          z-index: 5;
-       }
-
+  }
 </style>
 
 <script type="text/javascript">
 
 $(document).ready(() => {
 
-  console.log(locations);
    $('#filterButton').click(() => {
-    const requestURL = '../locations/' + $('#autocomplete').val().toLowerCase().split(' ').join('_');
-    console.log(requestURL);
-    console.log('making ajax request to:', requestURL);
 
-    // From: http://learn.jquery.com/ajax/jquery-ajax-methods/
-    // Using the core $.ajax() method since it's the most flexible.
-    // ($.get() and $.getJSON() are nicer convenience functions)
+    // Composes the URL that the GET request will use to obtain the posts depending on what location is typed in the search bar.
+    const requestURL = '../locations/' + $('#autocomplete').val().toLowerCase().split(' ').join('_');
+
+    // AJAX request to get the posts that are specific to the location typed into the search bar.
     $.ajax({
       url: requestURL,
       type: 'GET',
       dataType : 'json', // this URL returns data in JSON format
       success: (data) => {
-        console.log('You received some data!', data);
-        console.log(data.length);
         if (data) {
+          // Removing the already existing posts
           $('.zoom').remove();
+          // Adding the posts specific to the location
           for (i = 0; i < data.length; ++i) {
             $("#pics").append('<div class="zoom"><a class="alllinks" href="/post/' + data[i].pid + '"><img class="allpics" src="' + data[i].img + '"></a></div>' );
           }
@@ -129,29 +133,16 @@ $(document).ready(() => {
       },
     });
   });
-/*
-  $('#allUsersButton').click(() => {
-    $.ajax({
-      url: '../users/',
-      type: 'GET',
-      dataType : 'json',
-      success: (data) => {
-        console.log('You received some data!', data);
-        $('#status').html('All users: ' + data);
-      },
-    });
-  });
-*/
+
   // define a generic Ajax error handler:
   // http://api.jquery.com/ajaxerror/
   $(document).ajaxError(() => {
-    $('#status').html('Error: unknown ajaxError!');
     console.log('Error: unknown ajaxError!');
   });
-
-  //$('.dropdown-toggle').dropdown();
 });
 </script>
+
+<!-- HTML code of the page -->
 <body>
 <div class="row">
   <div class="col-10">
@@ -162,6 +153,8 @@ $(document).ready(() => {
   </div>
 </div>
 <hr/>
+
+<!-- Code used to display the map object -->
 <div class="row">
   <div class="col-12">
     <div id="floating-panel">
@@ -175,6 +168,7 @@ $(document).ready(() => {
 </div>
 <hr/>
 
+<!-- Code used for the search bar -->
 <div class="row">
   <div class="col-12 gallery text-center" id="locationField">
     <h1>Gallery</h1>
@@ -182,6 +176,8 @@ $(document).ready(() => {
         placeholder="Enter a location">    <button id="filterButton">Look up Location!</button>
   </div>
 </div>
+
+<!-- Code used to display the pictures of posts -->
 <div class="row">
   <div class="col-12 gallery">
     <br>
@@ -196,26 +192,24 @@ $(document).ready(() => {
 <div class="col-1"></div>
 <div id="status"></div>
 
+
 <script>
 var placeSearch, autocomplete, geocoder, map, heatmap;
 let locations = [];
 
-
+// Callback function for importing the google maps API
 function initAutocomplete() {
-  {% for post in posts %}
-    locations.push({lat: {{post.lat}}, lng: {{post.lng}}});
-  {% endfor %}
-  console.log(locations);
-  console.log("Creating map");
+  // Creating the map object
   map = new google.maps.Map(document.getElementById('map'), {
     zoom: 2.15,
     center: {lat: 30, lng: 5}
     });
-
+    // Creating the heatmap object
     heatmap = new google.maps.visualization.HeatmapLayer({
           data: getPoints(),
           map: map
         });
+    // Function to get the longitude and latitude to render on the heatmap
     function getPoints() {
       return [
         {% for post in posts %}
@@ -224,8 +218,7 @@ function initAutocomplete() {
       ];
     }
 
-
-  console.log("HELLO!");
+  // Creating the objects needed to enable the autocomplete functionality and geocoding to extract the longitude and latitude of the different locations
   geocoder = new google.maps.Geocoder();
   autocomplete = new google.maps.places.Autocomplete(
       (document.getElementById('autocomplete'))/*,
@@ -234,10 +227,12 @@ function initAutocomplete() {
   autocomplete.addListener('place_changed', fillInAddress);
 }
 
+// Allow toggling of heat map on the Google map.
 function toggleHeatmap() {
     heatmap.setMap(heatmap.getMap() ? null : map);
   }
 
+  // Changing the properties of the heatmap
   function changeGradient() {
     var gradient = [
       'rgba(0, 255, 255, 0)',
@@ -266,30 +261,22 @@ function toggleHeatmap() {
     heatmap.set('opacity', heatmap.get('opacity') ? null : 0.2);
   }
 
+// Creating a geocode for the address
 function codeAddress(address) {
     geocoder.geocode( { 'address': address}, function(results, status) {
-      if (status == 'OK') {
-        console.log("Result:" + results[0].geometry.location);
-      } else {
-        console.log('Geocode was not successful for the following reason: ' + status);
-      }
     });
   }
 
+// Function that allows zooming in of the map when searching for a specific location
 function fillInAddress() {
   var place = autocomplete.getPlace();
-  console.log(place.geometry.location.lng());
-  console.log(place.geometry.location.lat());
   if (place.geometry) {
     map.panTo(place.geometry.location);
     map.setZoom(10);
     search();
   }
-  else {
-
-  }
-  //   codeAddress(document.getElementById('autocomplete').value);
 }
+
     </script>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDXeYN_tTJ0na7vyK94PMAxBhgKrV7Ac-U&libraries=places,visualization&callback=initAutocomplete&language=en"
         async defer></script>

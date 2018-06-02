@@ -1,7 +1,13 @@
+<!--
+This page contains the code that is used to render the data for a specific post data, including the post image, author, date of creation, location and body. The users here are allowed to
+comment on the post, pin the post so that it appears on their profile page for fast access, and delete the post if they were the original creators of the post.
+-->
+
 {% extends 'layout.html' %}
 {% block body %}
-<style>
 
+<!-- Styling of elements in the page -->
+<style>
   .flex-container {
     display: flex;
     justify-content: center;
@@ -59,9 +65,11 @@
      cursor: pointer;
    }
 </style>
+
 <script type="text/javascript">
 
 $(document).ready(() => {
+  // Code for changing the pin icon
   if ({{ pinned }}) {
     $('#pin').hide();
     $('#unpin').show();
@@ -70,13 +78,13 @@ $(document).ready(() => {
     $('#pin').show();
   }
 
+  // Handling the pinning of posts
   $('#pin').click(() => {
     if (!window.isSignedIn) {
       alert('You need to signin to pin this wonderful post.');
       return;
     }
     const requestURL = {{pid}} + "/pin";
-    console.log(requestURL);
     $.ajax({
       url: requestURL,
       type: 'POST',
@@ -84,16 +92,14 @@ $(document).ready(() => {
         pid: {{pid}}
       },
       success: (data) => {
-        console.log(data);
         window.location.reload();
       }
     });
   });
 
+  // Handling the unpinning of posts
   $('#unpin').click(() => {
-    console.log("YAS!");
     const requestURL = {{pid}} + "/unpin";
-    console.log(requestURL);
     $.ajax({
       url: requestURL,
       type: 'POST',
@@ -101,15 +107,14 @@ $(document).ready(() => {
         pid: {{pid}}
       },
       success: (data) => {
-        console.log(data);
         window.location.reload();
       }
     });
   });
 
+  // Handling the deleting of posts
   $('#delete').click(() => {
     const requestURL = {{pid}} + "/delete";
-    console.log('making delete call to '+requestURL);
     $.ajax({
       url: requestURL,
       type: 'POST',
@@ -117,20 +122,18 @@ $(document).ready(() => {
         pid: {{pid}}
       },
       success: (data) => {
-        console.log(data);
         window.location.replace('/');
       }
     });
   });
 
-
+  // Handling the submitting of a comment
   $('#submitBtn').click(() => {
     if (!window.isSignedIn) {
       alert('You need to signin to post comment.');
       return;
     }
     const requestURL = {{pid}};
-    console.log('making ajax request to:', requestURL);
     $.ajax({
       url: requestURL,
       type: 'POST',
@@ -145,6 +148,7 @@ $(document).ready(() => {
 });
 </script>
 
+<!-- Displaying the post data -->
 <div class="flex-container">
   <img  id="primary_img" src="{{ img }}"/>
 </div>
@@ -172,10 +176,12 @@ $(document).ready(() => {
     <img id="pin" src="http://icons.iconarchive.com/icons/icons8/ios7/512/Messaging-Pin-icon.png">
     <img id="unpin" src="https://cdn.iconscout.com/public/images/icon/premium/png-512/unpin-3d9199aedef16fca-512x512.png">
   </div>
+  <!-- Displaying the delete icon only if I was the creator of the post -->
   {% if me %}
   <div class="col-1"><img id="delete" src="https://cdn0.iconfinder.com/data/icons/social-messaging-ui-color-shapes/128/close-circle-red-512.png"></img></div>
   {% endif %}
 </div>
+<!-- Displaying comments made on the post -->
 {% for comment in comments %}
 <div class="row comment">
   <div class="col-3"><h2> {{ comment.author_name }} </h2> </div>
@@ -183,6 +189,8 @@ $(document).ready(() => {
   <div class="col-7"> {{comment.body }} </div>
 </div>
 {% endfor %}
+
+<!-- Form to input a new comment -->
 <h2><strong>Add a comment!</strong></h2>
 <div id="comment">
   <textarea id="comment_text" rows="4" style="width: 100%">
@@ -192,8 +200,5 @@ $(document).ready(() => {
 </div>
 
 <hr/>
-<footer>
-  <h4>Thanks for using Here-n-There!</h4>
-</footer>
 
 {% endblock %}

@@ -1,12 +1,15 @@
 /*
- * Here-n-There:
- * COGS121 course project Spring 2018
- * Author: Shuyuan Ma, Hasan Jamaly, Dominic Spencer
+  This file has all the code that handles the get and post requests made while using the website. It holds all the data that is responsible for
+  sending data to all the pages in the front end.
  */
+
+// Requireing all the dependencies for the website to function properly.
 const express = require('express');
 const flash = require('express-flash-2');
 const nunjucks = require('nunjucks');
 const sqlite3 = require('sqlite3');
+
+// Instantiating a database object to use while running the website.
 const db = new sqlite3.Database('app.db');
 
 const path = require('path');
@@ -19,7 +22,6 @@ const bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({extended: true}));
 
 // validate google id id token
-// https://developers.google.com/identity/one-tap/web/idtoken-auth
 const {OAuth2Client} = require('google-auth-library');
 const CLIENT_ID = '687083663797-h6rk9pcjjm2ac1kib7kcbbjqpqc2ipcg.apps.googleusercontent.com'
 const client = new OAuth2Client(CLIENT_ID);
@@ -27,14 +29,9 @@ async function verify(token) {
   const ticket = await client.verifyIdToken({
       idToken: token,
       audience: CLIENT_ID,  // Specify the CLIENT_ID of the app that accesses the backend
-      // Or, if multiple clients access the backend:
-      //[CLIENT_ID_1, CLIENT_ID_2, CLIENT_ID_3]
   });
   const payload = ticket.getPayload();
   const userid = payload['sub'];
-  console.log('token veryfied');
-  // If request specified a G Suite domain:
-  //const domain = payload['hd'];
 }
 
 
@@ -44,6 +41,7 @@ app.use(express.static('src'));
 // random secret key
 app.use(cookieParser('Y76(&@GB@#H@(&))'));
 
+// Initializes a session so the user doesn't need to sign in again for a specified period of time
 app.use(session({
   secret: 'keyboard cat',
   resave: true,
@@ -67,15 +65,15 @@ nunjucks.configure('src/html', {
  */
 app.get('/', (req, res) => {
   const posts = [];
+  // Grabbing the posts to be displayed in the gallery
   db.serialize(() => {
     db.each("SELECT * FROM posts", (err, row) => {
       posts.push(row);
     }, () => {
-      // All done fetching records, render response
-      // console.log(posts);
       const signedInUser = req.session.signedInUser;
       const isSignedIn = !!signedInUser;
       let avatar = '';
+      // Checking if a user is signed in to their account
       if (isSignedIn) {
         if (!signedInUser.img) {
           res.redirect('/signup');
@@ -85,8 +83,8 @@ app.get('/', (req, res) => {
       } else {
         avatar = '/img/meme.jpg';
       }
+      // Bundling up the data to be sent back to the homepage.
       const data = {posts: posts, title: 'Here-n-There', avatar: avatar, isSignedIn: isSignedIn || 0};
-      console.log(data);
       res.render("index.html", data);
     });
   });
@@ -96,6 +94,7 @@ app.get('/', (req, res) => {
  * Making new posts, require login
  */
 app.get('/newpost', (req, res) => {
+  // checks if the user is logged in or not and acts accordingly
   const signedInUser = req.session.signedInUser;
   const isSignedIn = !!signedInUser;
   if (isSignedIn) {
@@ -112,29 +111,10 @@ app.get('/newpost', (req, res) => {
 });
 
 /*
- * Browse locations, doesn't require login
- */
-app.get('/locations', (req, res) => {
-  const signedInUser = req.session.signedInUser;
-  const isSignedIn = !!signedInUser;
-  let avatar = '';
-  if (isSignedIn) {
-    if (!signedInUser.img) {
-      res.redirect('/signup');
-      return;
-    }
-    avatar = signedInUser.img;
-  } else {
-    avatar = '/img/meme.jpg';
-  }
-  const data = {title: 'Locations', avatar: avatar, isSignedIn: isSignedIn || 0};
-  res.render("locations.html", data);
-});
-
-/*
  * View user's profile, require login
  */
 app.get('/profile', (req, res) => {
+  // checks the user that has logged in
   const signedInUser = req.session.signedInUser;
   const isSignedIn = !!signedInUser;
   if (isSignedIn) {
@@ -148,19 +128,21 @@ app.get('/profile', (req, res) => {
     const pinned = [];
     let posts = [];
     const pinnedposts = [];
+    // Grabbing the posts pinned by the user
     db.serialize(() => {
       db.each("SELECT * FROM pins WHERE uid = '" + uid + "'", (err, row) => {
         pinned.push(row);
       }, () => {
-        let whatever = [];
+        let pinnedids = [];
         for (x in pinned) {
-          whatever.push(pinned[x].pid);
+          pinnedids.push(pinned[x].pid);
         }
-          let whatever2 = whatever.toString();
-          let argument = "(" + whatever2 + ")";
+          let pinnedstring = pinnedids.toString();
+          let argument = "(" + pinnedstring + ")";
           db.each("SELECT * FROM posts WHERE pid in " + argument , (err, row) => {
             pinnedposts.push(row);
           }, () => {
+            // Grabbing the posts that the user wrote
             db.each("SELECT * FROM posts WHERE author_uid = '" + uid + "'", (err, row) => {
               posts.push(row);
             }, () => {
@@ -171,7 +153,6 @@ app.get('/profile', (req, res) => {
                 return obj;
               })
               const data = {title: 'Profile', avatar: avatar, uname: uname, posts: posts, pinned: pinnedposts, isSignedIn: true};
-              console.log(data);
               res.render('profile.html', data);
             });
           });
@@ -183,36 +164,19 @@ app.get('/profile', (req, res) => {
 });
 
 /*
- * About page, doesn't require login
- */
-app.get('/about', (req, res) => {
-  const signedInUser = req.session.signedInUser;
-  const isSignedIn = !!signedInUser;
-  let avatar = '';
-  if (isSignedIn) {
-    if (!signedInUser.img) {
-      res.redirect('/signup');
-      return;
-    }
-    avatar = signedInUser.img;
-  } else {
-    avatar = '/img/meme.jpg';
-  }
-  const data = {title: 'About', avatar: avatar, isSignedIn: isSignedIn || 0};
-  res.render("about.html", data);
-});
-
-
+ * Allows specific posts to be rendered on the home page when a location is looked up in the search bar.
+*/
 app.get('/locations/:location', (req, res) => {
   const posts = [];
+  // Deconstructing the string to a location that can be looked up
   const locationToLookup = req.params.location.toLowerCase().split('_').join(' '); // matches ':location' above
+  // Grabbing all posts under a specific location name
   db.serialize(() => {
     db.each("SELECT * FROM posts WHERE location = '" + locationToLookup + "' COLLATE NOCASE", (err, row) => {
       posts.push(row);
     }, () => {
       // All done fetching records, send response;
       res.send(posts);
-      //  res.render("index.html", {posts: posts, title: 'home'});
     });
   });
 });
@@ -257,8 +221,12 @@ app.get('/signup', (req, res) => {
 });
 
 
+/*
+ * Creating the new account in the users table
+ */
 app.post('/signup', (req, res) => {
   const google_id = req.session.signedInUser.google_id;
+  // Inserting into the users table
   db.run(
     'INSERT INTO users VALUES (NULL, $name, $img, $google_id)',
     // parameters to SQL query:
@@ -271,7 +239,6 @@ app.post('/signup', (req, res) => {
     (err) => {
       if (err) {
         console.log(err);
-        res.send({message: 'error in app.post(/signup)'});
       } else {
         // successfully signup user, now update session variable
         db.get("SELECT * FROM users WHERE google_id = '" + google_id + "'", (err, row) => {
@@ -279,10 +246,7 @@ app.post('/signup', (req, res) => {
             console.log(err);
           } else if (row) {
             req.session.signedInUser = Object.assign(req.session.signedInUser, row);
-            res.send({message: 'successfully run app.post(/signup)'});
           } else {
-            console.log('Error, somehow signup insertion to database failed.');
-            res.send({message: 'Error, somehow signup insertion to database failed.'});
           }
         });
       }
@@ -298,15 +262,12 @@ app.post('/idTokenLogin', (req, res) => {
   const google_id = req.body.google_id;
   // verify the token
   verify(idToken).catch(console.error).then((e) => {
-    console.log('verify callback, google_id: ' + google_id);
     req.session.signedInUser = {google_id: google_id};
     db.get("SELECT * FROM users WHERE google_id = '" + google_id + "'",
       // callback when query finished
       (err, row) => {
         if (err) {
-          console.log('login err: ' + err);
         } else if (row) {
-          // console.log('login acquired:', row);
           req.session.signedInUser = Object.assign(req.session.signedInUser, row);
           res.send(req.session.signedInUser);
         } else {
@@ -331,39 +292,12 @@ app.post('/logout', (req, res) => {
   res.send();
 });
 
+
 /*
- * handle data access
- */
-app.get('/users', (req, res) => {
-  let names = [];
-  db.serialize(() => {
-      db.each("SELECT name FROM users", (err, row) => {
-          names.push(row);
-      }, () => {
-          // All done fetching records, render response;
-          res.send(names);
-        //  res.render("index.html", {posts: posts, title: 'home'});
-      });
-    });
-});
-
-app.get('/users/:username', (req, res) => {
-  let posts = [];
-  const nameToLookup = req.params.username.toLowerCase().split('_').join(' '); // matches ':userid' above
-  db.serialize(() => {
-    const nameToLookup = req.params.username.toLowerCase().split('_').join(' '); // matches ':userid' above
-      db.each("SELECT * FROM users WHERE name = '" + nameToLookup + "' COLLATE NOCASE", (err, row) => {
-          posts.push(row);
-      }, () => {
-          // All done fetching records, render response;
-          res.send(posts);
-        //  res.render("index.html", {posts: posts, title: 'home'});
-      });
-    });
-});
-
-
+* Handles rendering a specific post's data to display.
+*/
 app.get('/post/:postid', (req, res) => {
+  // checks logged in user
   const signedInUser = req.session.signedInUser;
   const isSignedIn = !!signedInUser;
   const signedInUid = (isSignedIn) ? signedInUser.uid : -1;
@@ -395,17 +329,18 @@ app.get('/post/:postid', (req, res) => {
           const data = Object.assign({avatar: avatar, isSignedIn: isSignedIn || 0, comments: comments, me: deleting, pinned: pinned}, post);
           // parse time
           const date = new Date(data.time);
-          data.time = date.toLocaleString();
-          console.log('\npost/'+postid+' data:');
-          console.log(data);
+          data.time = date.toLocaleString();;
           res.render("post.html", data);
         });
     });
   });
 });
 
-
+/*
+ * Handles the pinning of a post
+ */
 app.post('/post/:postid/pin', (req, res) => {
+  // checks signed in user
   const signedInUser = req.session.signedInUser;
   const isSignedIn = !!signedInUser;
   if (!isSignedIn) {
@@ -413,7 +348,7 @@ app.post('/post/:postid/pin', (req, res) => {
     return;
   }
   const pid = req.params.postid;
-  console.log('\nPOST/post/'+pid+'/pin');
+  // creates entry in database table
   db.run(
     'INSERT INTO pins VALUES ($uid, $pid)',
     // parameters to SQL query:
@@ -425,15 +360,16 @@ app.post('/post/:postid/pin', (req, res) => {
     (err) => {
       if (err) {
         console.log(err);
-        res.send({message: 'error in app.post(/:postid/pin)'});
-      } else {
-        res.send({message: 'successfully run app.post(/:postid/pin)'});
       }
     }
   );
 });
 
+/*
+* Handles unpinning of post
+*/
 app.post('/post/:postid/unpin', (req, res) => {
+  // checks if user is signed in
   const signedInUser = req.session.signedInUser;
   const isSignedIn = !!signedInUser;
   if (!isSignedIn) {
@@ -441,7 +377,7 @@ app.post('/post/:postid/unpin', (req, res) => {
     return;
   }
   const pid = req.params.postid;
-  console.log('\nPOST/post/'+pid+'/unpin');
+  // removing pin from database table
   db.run(
     'DELETE FROM pins WHERE uid=$author_uid AND pid=$post',
     // parameters to SQL query:
@@ -453,15 +389,16 @@ app.post('/post/:postid/unpin', (req, res) => {
     (err) => {
       if (err) {
         console.log(err);
-        res.send({message: 'error in app.post(/:postid/unpin)'});
-      } else {
-        res.send({message: 'successfully run app.post(/:postid/unpin)'});
       }
     }
   );
 });
 
+/*
+* Handles deleting a post
+*/
 app.post('/post/:postid/delete', (req, res) => {
+  // checks if user is signed in
   const signedInUser = req.session.signedInUser;
   const isSignedIn = !!signedInUser;
   if (!isSignedIn) {
@@ -469,8 +406,7 @@ app.post('/post/:postid/delete', (req, res) => {
     return;
   }
   const pid = req.params.postid;
-  console.log(pid);
-  console.log(req.body);
+  // deletes post entry from table
   db.run(
     'DELETE FROM posts WHERE pid=$post',
     // parameters to SQL query:
@@ -479,6 +415,7 @@ app.post('/post/:postid/delete', (req, res) => {
     },
     // callback function to run when the query finishes:
     () => {
+      // deletes all pins of the deleted post
       db.run(
         'DELETE FROM pins WHERE pid=$post',
         // parameters to SQL query:
@@ -489,9 +426,6 @@ app.post('/post/:postid/delete', (req, res) => {
         (err) => {
           if (err) {
             console.log(err);
-            res.send({message: 'error in app.post(/post/:postid/delete)'});
-          } else {
-            res.send({message: 'successfully run app.post(/post/:postid/delete)'});
           }
         }
       );
@@ -499,17 +433,18 @@ app.post('/post/:postid/delete', (req, res) => {
   );
 });
 
-
-
+/*
+* Handles the creation of a new comment to a post
+*/
 app.post('/post/:postid', (req, res) => {
+  // Checks signed in user
   const signedInUser = req.session.signedInUser;
   const isSignedIn = !!signedInUser;
   if (!isSignedIn) {
     res.send({message: 'not signedin'});
     return;
   }
-  console.log("body is : " + req.body);
-
+  // inserting comment into table
   db.run(
     'INSERT INTO comments VALUES (NULL, $author_UID,$author, $post, $content)',
     // parameters to SQL query:
@@ -523,25 +458,24 @@ app.post('/post/:postid', (req, res) => {
     (err) => {
       if (err) {
         console.log(err);
-        res.send({message: 'error in comment app.post(/post/:postid)'});
-      } else {
-        res.send({message: 'successfully run comment app.post(/post/:postid)'});
       }
     }
   );
 });
 
 
+/*
+* handles creating a new post
+*/
 app.post('/newpost', (req, res) => {
+  // checks for signed in user
   const signedInUser = req.session.signedInUser;
   const isSignedIn = !!signedInUser;
   if (!isSignedIn) {
     res.send({message: 'not signedin'});
     return;
   }
-  // guarantee user is signedin
-  console.log(req.body);
-
+  // inserts new post into database
   db.run(
     'INSERT INTO posts VALUES (NULL, $title, $img, $time, $author_uid, $author_name, $location, $lat, $lng, $content)',
     // parameters to SQL query:
@@ -560,24 +494,10 @@ app.post('/newpost', (req, res) => {
     (err) => {
       if (err) {
         console.log(err);
-        res.send({message: 'error in app.post(/newpost)'});
-      } else {
-        res.send({message: 'successfully run app.post(/newpost)'});
       }
     }
   );
 });
-
-
-// for testing flash message
-app.get('/flash', (req, res) => {
-  // Set a flash message by passing the key, followed by the value, to res.flash().
-  // for types, please refer https://getbootstrap.com/docs/4.0/components/alerts/
-  res.flash('danger', 'Flash danger is back!');
-  res.flash('info', 'Flash info is back!');
-  res.redirect('/');
-});
-
 
 // start the server at URL: http://localhost:3000/
 app.listen(3000, () => {
