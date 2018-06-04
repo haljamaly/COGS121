@@ -446,6 +446,9 @@ app.post('/post/:postid/delete', (req, res) => {
         (err) => {
           if (err) {
             console.log(err);
+            res.send({message: 'error in app.post(/post/:postid/delete)'});
+          } else {
+            res.send({message: 'successfully run app.post(/post/:postid/delete)'});
           }
         }
       );
@@ -478,6 +481,9 @@ app.post('/post/:postid', (req, res) => {
     (err) => {
       if (err) {
         console.log(err);
+        res.send({message: 'error in comment app.post(/post/:postid)'});
+      } else {
+        res.send({message: 'successfully run comment app.post(/post/:postid)'});
       }
     }
   );
@@ -514,6 +520,9 @@ app.post('/newpost', (req, res) => {
     (err) => {
       if (err) {
         console.log(err);
+        res.send({message: 'error in app.post(/newpost)'});
+      } else {
+        res.send({message: 'successfully run app.post(/newpost)'});
       }
     }
   );
