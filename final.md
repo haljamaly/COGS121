@@ -12,7 +12,7 @@
    the database to the Google Map on the profile page and enabling pinning locations where posts have been made. Created the navigation bar.
    
 3. Dominic Spencer: Created the front end place holders for forms. Implemented the wrapping of images in the gallery for the homepage. 
-   Added features to the front end interface and organized the pages of the application. 
+   Added features to the front end interface and organized the pages of the application. Final video.
    
 **Source code files:**
 
@@ -36,4 +36,5 @@
 
 **Demo Video Link:** 
 
+https://drive.google.com/file/d/1kHUr8_TwYluPh5lCCGVRCZmQCrpyi9T3/view
 
