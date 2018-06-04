@@ -239,14 +239,18 @@ app.post('/signup', (req, res) => {
     (err) => {
       if (err) {
         console.log(err);
+        res.send({message: 'error in app.post(/signup)'});
       } else {
         // successfully signup user, now update session variable
         db.get("SELECT * FROM users WHERE google_id = '" + google_id + "'", (err, row) => {
           if (err) {
             console.log(err);
+            res.send({message: 'error in database: ' + err});
           } else if (row) {
             req.session.signedInUser = Object.assign(req.session.signedInUser, row);
+            res.send({message: 'successfully run app.post(/signup)'});
           } else {
+            res.send({message: 'Error, somehow signup insertion to database failed.'});
           }
         });
       }
@@ -297,11 +301,22 @@ app.post('/logout', (req, res) => {
 * Handles rendering a specific post's data to display.
 */
 app.get('/post/:postid', (req, res) => {
+  console.log('get post/');
   // checks logged in user
   const signedInUser = req.session.signedInUser;
   const isSignedIn = !!signedInUser;
   const signedInUid = (isSignedIn) ? signedInUser.uid : -1;
-  const avatar = isSignedIn ? signedInUser.img : '/img/meme.jpg';
+  let avatar = '';
+  // Checking if a user is signed in to their account
+  if (isSignedIn) {
+    if (!signedInUser.img) {
+      res.redirect('/signup');
+      return;
+    }
+    avatar = signedInUser.img;
+  } else {
+    avatar = '/img/meme.jpg';
+  }
   let post = {};
   let pinned = 0;
   const comments = [];
@@ -326,6 +341,7 @@ app.get('/post/:postid', (req, res) => {
         }, () => {
           // All done fetching records, merge data and render response;
           const deleting = (signedInUid == post.author_uid) ? 1 : 0;
+
           const data = Object.assign({avatar: avatar, isSignedIn: isSignedIn || 0, comments: comments, me: deleting, pinned: pinned}, post);
           // parse time
           const date = new Date(data.time);
@@ -360,6 +376,8 @@ app.post('/post/:postid/pin', (req, res) => {
     (err) => {
       if (err) {
         console.log(err);
+      } else {
+        res.send();
       }
     }
   );
@@ -389,6 +407,8 @@ app.post('/post/:postid/unpin', (req, res) => {
     (err) => {
       if (err) {
         console.log(err);
+      } else {
+        res.send();
       }
     }
   );
